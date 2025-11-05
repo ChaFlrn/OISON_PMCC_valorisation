@@ -1,23 +1,24 @@
 # Importation des fichiers COMMUNE.gpkg et DEPARTEMENT.gpkg
 
-departements <- st_read("assets/limites_administratives/DEPARTEMENTS.gpkg") %>% 
+departements <- st_read("assets/limites_administratives/departements.gpkg") %>% 
   
   select(INSEE_DEP,
-         NOM,
+         NOM_DEP,
          geom) %>% 
   
-  rename(Departement=NOM)
+  rename(Departement = NOM_DEP)
 
-communes <- st_read("assets/limites_administratives/COMMUNES.gpkg") %>% 
+communes <- st_read("assets/limites_administratives/communes.gpkg") %>% 
   
-  select(code_insee_du_departement,
-         code_insee,
-         nom_officiel,
+  select(departement,
+         code,
+         Code_postal,
+         nom,
          geom) %>% 
   
-  rename(INSEE_DEP=code_insee_du_departement,
-         INSEE_COM=code_insee,
-         Commune=nom_officiel)
+  rename(INSEE_DEP = departement,
+         INSEE_COM = code,
+         Commune = nom)
 
 st_write(communes, "processed_data/communes.gpkg",append=FALSE)
 st_write(departements, "processed_data/departements.gpkg",append=FALSE)

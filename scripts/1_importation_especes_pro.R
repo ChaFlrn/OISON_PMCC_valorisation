@@ -1,5 +1,4 @@
-Picardie_vegetaux <- read.csv2("assets/especes_pro/Picardie_vegetaux.csv")
-Nord_vegetaux <- read.csv2("assets/especes_pro/Nord_vegetaux.csv")
+# Lire les fichiers des espèces protégées au niveau national et régional (si besoin) 
 FR_escargots <- read.csv2("assets/especes_pro/FR_escargots.csv")
 FR_vegetaux <- read.csv2("assets/especes_pro/FR_vegetaux.csv")
 FR_écrevisses <- read.csv2("assets/especes_pro/FR_écrevisses.csv")
@@ -17,9 +16,7 @@ FR_mammiferes_marins <- read.csv2("assets/especes_pro/FR_mammiferes_marins.csv")
 FR_amphibiens_reptiles <- read.csv2("assets/especes_pro/FR_amphibiens_reptiles.csv")
 FR_tortues_marines <- read.csv2("assets/especes_pro/FR_tortues_marines.csv")
 
-liste_especes_pro <- bind_rows( Picardie_vegetaux,
-                                Nord_vegetaux,
-                                FR_escargots,
+liste_especes_pro <- bind_rows( FR_escargots,
                                 FR_vegetaux,
                                 FR_écrevisses,
                                 FR_vegetaux_marins,
