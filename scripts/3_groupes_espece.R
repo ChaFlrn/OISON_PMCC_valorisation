@@ -5,28 +5,35 @@ OISON_PMC <- st_read("processed_data/OISON_PMC.gpkg")
 #  Evolution de la saisie par groupe d'espèce
 ###############################################
 colors_esp <- c(
-  "Arachnides" = "#E41A1C",      # Rouge vif
-  "Autres" = "#377EB8",          # Bleu foncé
-  "Reptiles" = "#4DAF4A",        # Vert
-  "Poissons" = "#984EA3",        # Violet foncé
-  "Angiospermes" = "#FF7F00",    # Orange
-  "Amphibiens" = "#FFFF33",      # Jaune vif
-  "Insectes" = "#A65628",        # Brun
-  "Mammifères" = "#F781BF",      # Rose
-  "PMC" = "#D8B365",             # Brun clair
-  "Crustacés" = "#66C2A5",       # Vert turquoise
-  "Oiseaux" = "#3288BD"          # Bleu clair
+  "Arachnides" = "#E41A1C",     
+  "Autres" = "#377EB8",         
+  "Reptiles" = "#4DAF4A",       
+  "Poissons" = "#984EA3",       
+  "Angiospermes" = "#FF7F00",  
+  "Amphibiens" = "#FFFF33",     
+  "Insectes" = "#A65628",        
+  "Mammifères" = "#F781BF",      
+  "PMC" = "#D8B365",             
+  "Crustacés" = "#66C2A5",       
+  "Oiseaux" = "#3288BD"          
 )
 
 colors_dep <- c(
-  "02" = "#FF6F61",   # Coral
-  "80" = "#6B5B95",   # Purple
-  "62" = "#88B04B",   # Greenery
-  "59" = "#F7CAC9",   # Rose Quartz
-  "60" = "#92A8D1"    # Serenity
+  "16" = "#FF6F61",   
+  "17" = "#3A6EA5",   
+  "19" = "#E3B23C",   
+  "23" = "#9DBE8C",  
+  "24" = "#FF9B85",   
+  "33" = "#B0C4DE",   
+  "40" = "#F3E000",   
+  "47" = "#2C3E50",  
+  "64" = "#C17ECF",   
+  "79" = "#B2957B",    
+  "86" = "#8F5B34",   
+  "87" = "#FFF3B4"   
 )
 
-#
+# Regrouper les espèces par années
 groupes_espece_par_annee <- OISON_PMC %>% 
   group_by(annee,GROUP2_INPN) %>% 
   summarise(nb_saisies = n()) %>% 
@@ -62,7 +69,7 @@ ggplot(OISON_PMC) +
     x = "",
     y = "",
     fill = "Départements",
-    title = "Proportion des groupes d'espèces par département (OISON+PMC)"
+    title = "Proportion des groupes d'espèces par département (OISON + PMC)"
   ) +
   coord_polar(theta = "x") +
   theme_minimal()
@@ -77,7 +84,7 @@ groupes_espece_radar <- OISON_PMC %>%
 # Proportion des saisies par groupe d'espèce
 ###############################################
 
-#
+# Calcul des proportions
 groupes_espece <- OISON_PMC %>% 
   group_by(GROUP2_INPN) %>% 
   summarise(nb_saisies = n()) %>% 
@@ -105,5 +112,5 @@ ggplot(groupes_espece)+
             )+
   labs(
     fill = "Groupes d'espèce",
-    title = "Proportion des saisies par groupe d'espèce depuis 2020 (OISON+PMC)"
+    title = "Proportion des saisies par groupe d'espèce depuis 2020 (OISON + PMC)"
     )

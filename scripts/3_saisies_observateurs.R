@@ -1,14 +1,21 @@
 #Importation OISON_PMC
 OISON_PMC <- st_read("processed_data/OISON_PMC.gpkg")
 
-##LES COULEURS
+# LES COULEURS
 
 colors_dep <- c(
-  "02" = "#FF6F61",   # Coral
-  "80" = "#6B5B95",   # Purple
-  "62" = "#88B04B",   # Greenery
-  "59" = "#F7CAC9",   # Rose Quartz
-  "60" = "#92A8D1"    # Serenity
+  "16" = "#FF6F61",   
+  "17" = "#3A6EA5",   
+  "19" = "#E3B23C",   
+  "23" = "#9DBE8C",  
+  "24" = "#FF9B85",   
+  "33" = "#B0C4DE",   
+  "40" = "#F3E000",   
+  "47" = "#2C3E50",  
+  "64" = "#C17ECF",   
+  "79" = "#B2957B",    
+  "86" = "#8F5B34",   
+  "87" = "#FFF3B4"   
 )
 
 ###############################################
@@ -45,14 +52,14 @@ ggplot(saisies) +
     x = "Années",
     y = "Nombre de saisies",
     fill = "Départements",
-    title = "Evolution du nombre de saisies par département (OISON+PMC)"
+    title = "Evolution du nombre de saisies par département (OISON + PMC)"
   ) +
   geom_text(data = filter(saisies, annee == max(saisies$annee)),
             aes(label = nombre_saisies, x = annee + 0.2),
             position = position_stack(vjust = 0.5)) +
   theme_minimal()
 
-#histogramme des departements par annee
+# Histogramme des departements par annee
 saisies_histo <- saisies
 saisies_histo$annee <- as.factor(saisies_histo$annee)
 
@@ -82,7 +89,7 @@ ggplot(saisie_derniere_annee) +
   ) +
   labs(
     fill = "Départements",
-    title = paste("Saisies sur l'année", max(saisies$annee), "(OISON+PMC)")
+    title = paste("Saisies sur l'année", max(saisies$annee), "(OISON + PMC)")
   )
 
 ###############################################
@@ -118,7 +125,7 @@ ggplot(observateurs) +
     x = "Années",
     y = "Nombre d'observateurs par année",
     fill = "Départements",
-    title = "Evolution du nombre d'observateurs par département (OISON+PMC)"
+    title = "Evolution du nombre d'observateurs par département (OISON + PMC)"
   ) +
   geom_text(data = filter(observateurs, annee == max(observateurs$annee)),
             aes(label = nombre_observateurs, x = annee + 0.2),
@@ -138,7 +145,7 @@ ggplot(observateurs_derniere_annee) +
   ) +
   labs(
     fill = "Départements",
-    title = paste("Nombre d'observateurs sur l'année", max(observateurs$annee), "(OISON+PMC)")
+    title = paste("Nombre d'observateurs sur l'année", max(observateurs$annee), "(OISON + PMC)")
   )
 
 ###############################################
@@ -185,7 +192,7 @@ ggplot(saisies_observateur) +
     x = "Années",
     y = "Nombre moyen de saisie par observateur",
     fill = "Départements",
-    title = "Evolution du nombre moyen de saisies par observateur par département (OISON+PMC)"
+    title = "Evolution du nombre moyen de saisies par observateur par département (OISON + PMC)"
   ) +
   geom_text(data = filter(saisies_observateur, annee == max(saisies_observateur$annee)),
             aes(label = round(moyenne_saisies_observateur,1), x = annee + 0.2),
@@ -204,7 +211,7 @@ ggplot(saisies_observateur_derniere_annee) +
                 label = paste(round(moyenne_saisies_observateur, 1), "\n", pourcentage, "%"))) +
   labs(
     fill = "Départements",
-    title = paste("Nombre moyen de saisies par observateur sur l'année", max(saisies_observateur$annee), "(OISON+PMC)")
+    title = paste("Nombre moyen de saisies par observateur sur l'année", max(saisies_observateur$annee), "(OISON + PMC)")
   )
 
 saisies_observateur2 <- OISON_PMC %>%
@@ -219,7 +226,7 @@ ggplot(saisies_observateur2, aes(x = factor(INSEE_DEP), y = nombre_saisies)) +
   labs(
     x = "Départements",
     y = "Nombre de saisies par observateur",
-    title = paste("Nombre de saisies par observateur et département en",max(saisies_observateur$annee), "(OISON+PMC)"),
+    title = paste("Nombre de saisies par observateur et département en",max(saisies_observateur$annee), "(OISON + PMC)"),
     caption = "Explications :\n
     - La ligne centrale dans chaque boîte représente la médiane.\n
     - Les extrémités de la boîte représentent les 1er et 3e quartiles (Q1 et Q3).\n

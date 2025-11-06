@@ -12,21 +12,22 @@ departements <- st_read("processed_data/departements.gpkg")
 #          Carte par commune
 ###############################################
 
-#
+# Préparation base et création des classes
 observations_par_commune <- OISON_PMC %>% 
   group_by(annee,INSEE_DEP,INSEE_COM) %>%
   summarise(observations = n()) %>%
   filter(annee >= 2020) %>% 
-  st_set_geometry(NULL) %>% 
+  st_set_geometry(NULL) %>% # suppression geometry
   right_join(communes) %>% 
   group_by(INSEE_COM) %>%
   slice(1)
 
 class_intervals <- classIntervals(observations_par_commune$observations, n = 5, style = "jenks")
 
+#
 ggplot(observations_par_commune) +
   geom_sf(aes(geometry = geom, fill = observations), lwd = 0.05, color = "lightgrey") +
-  geom_sf(data = departements, fill = NA, color = "black", lwd = 0.5) +
+  geom_sf(data = departements, fill = NA, color = "black", lwd = 0.5) + # superposition des limites départementales
   scale_fill_fermenter(
     name = "Nombre de saisies par commune depuis 2020",
     type = "seq",
@@ -41,10 +42,11 @@ ggplot(observations_par_commune) +
 #             Carte de chaleur
 ###############################################
 
-colors_statut <- c("envahissante" = "#E41A1C",   # Rouge
-                   "protégée" = "#377EB8",      # Bleu
-                   "normal" = "#4DAF4A"        # Vert
-                   )
+colors_statut <- c(
+  "Envahissantes" = "#F77F00",   # Orange
+  "Menacées" = "#3DAF2A",        # Vert clair
+  "Normales" = "#377EB8"      # Bleu clair
+)
 
 observations_chaleur <- OISON_PMC %>% 
   filter(annee >= 2020)

@@ -1,10 +1,10 @@
-#Importation "especes_pmc" pour faire correspondre les noms d'espèces à un code nom et un nom scientifique
+# Importation "especes_pmc" pour faire correspondre les noms d'espèces à un code nom et à un nom scientifique
 
 especes_PMC <- read.csv2("assets/especes_pmc.csv", fileEncoding = "latin1") %>% 
   mutate(cd_nom = as.character(cd_nom))
 
-#Importation des données PMCC
-PMC <- read.csv2("raw_data/PMC_brute.csv", fileEncoding = "latin1") #Prendre à partir du serveur
+# Importation des données PMCC
+PMC <- read.csv2("raw_data/PMC_brute.csv", fileEncoding = "latin1") # Prendre à partir du serveur
 
 PMC <- PMC %>% 
   filter(!is.na(X_L93)) %>% 

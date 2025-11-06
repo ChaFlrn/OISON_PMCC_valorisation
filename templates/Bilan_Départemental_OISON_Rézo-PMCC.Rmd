@@ -1,6 +1,6 @@
 ---
 title: "`r paste('Bilan des saisies opportunistes - Service départemental', params$dep, sep = '\n')`"
-author: "OFB DR Hauts-de-France - Service régional Connaissance"
+author: "OFB DR Nouvelle-Aquitaine - Service régional Connaissance"
 date: "`r format(Sys.time(), '%d %B %Y')`"
 toc-title: "Sommaire"
 output:
@@ -65,11 +65,18 @@ colors_pmc <- c(
 )
 
 colors_dep <- c(
-  "02" = "#FF6F61",   # Coral
-  "80" = "#a57fc7",   # Violet
-  "62" = "#88B04B",   # Greenery
-  "59" = "#D2AB85",   # Light Brown
-  "60" = "#92A8D1"    # Serenity
+  "16" = "#FF6F61",   
+  "17" = "#3A6EA5",   
+  "19" = "#E3B23C",   
+  "23" = "#9DBE8C",  
+  "24" = "#FF9B85",   
+  "33" = "#B0C4DE",   
+  "40" = "#F3E000",   
+  "47" = "#2C3E50",  
+  "64" = "#C17ECF",   
+  "79" = "#B2957B",    
+  "86" = "#8F5B34",   
+  "87" = "#FFF3B4"   
 )
 
 colors_statut <- c(
@@ -87,12 +94,9 @@ colors_pro <- c(
 OISON_PMC <- st_read("../processed_data/OISON_PMC.gpkg")
 departements <- st_read("../processed_data/departements.gpkg")
 
-# Retirer les données du paraclet
-OISON_PMC <- OISON_PMC %>% 
-  filter(INSEE_COM!="80213")
 
 #Filtrage des données à conserver : OISON et/ou PMC ?
-nom_bases <- "(OISON+PMCC)"
+nom_bases <- "(OISON + PMCC)"
 
 if(params$OISON=="FALSE"){
   OISON_PMC <- OISON_PMC %>% 
@@ -112,19 +116,18 @@ if(params$PMC=="FALSE" & params$OISON=="FALSE"){
 ```
 
 # Introduction
-Les données présentées sont issues des bases de données OISON et du réseau-PMCC de l'OFB. Elles font ici l'objet d'un suivi sur le nombre de saisies, le nombre d'observateurs, la saisie moyenne par observateur, les groupes d'espèces, leur statut dans les listes rouges ou envahissantes, les espèces protégées en France et leur répartition géographique.
+Les données présentées sont issues des bases de données OISON et du réseau-PMCC de l'Office français de la biodiversité (OFB). Elles font ici l'objet d'un suivi sur le nombre de saisies, le nombre d'observateurs, la saisie moyenne par observateur, les groupes d'espèces, leur statut dans les listes rouges ou envahissantes, les espèces protégées en France et leur répartition géographique.
 
-Un observateur est relié au département dans lequel il a le plus saisie.
+Un observateur est relié au département dans lequel il a le plus saisi.
 
-Les saisies sur la commune de Cottenchy (80) ont été exclues.
 
 A propos de OISON :
 
 Depuis toujours les agents de l'OFB sur le terrain réalisent des observations qu'ils peuvent maintenant compiler dans un outil informatique permettant la saisie informatique en mode nomade des observations relatives aux espèces et aux milieux. Les données collectées sont majoritairement le résultat d'observations opportunistes ou fortuites, mais elles peuvent aussi être le résultat de la mise en œuvre de protocoles qui se caractérisent par des formulaires simples (nombre de champs réduits).
 
-A propos de rézo-PMCC :
+A propos du réseau-PMCC :
 
-Le réseau Petits et mésocarnivores (PMC) suit l’évolution de la répartition des populations de 14 espèces de carnivores en France métropolitaine, aux statuts règlementaires et de conservation variés. Les connaissances acquises grâce à ce réseau interne permettent à l’Office français de la biodiversité (OFB) d’apporter une expertise technique et scientifique sur ces espèces à tous les niveaux : départemental, régional, national et européen.
+Le réseau Petits et mésocarnivores (PMC) suit l’évolution de la répartition des populations de 14 espèces de carnivores en France métropolitaine, aux statuts règlementaires et de conservation variés. Les connaissances acquises grâce à ce réseau interne permettent à l’OFB d’apporter une expertise technique et scientifique sur ces espèces à tous les niveaux : départemental, régional, national et européen.
 
 \newpage
 
@@ -165,7 +168,6 @@ saisies_tableau <- saisies_tableau %>%
                 ~ format(., big.mark = " ", decimal.mark = ",", scientific = FALSE, trim = TRUE))) %>%
   mutate(annee = as.character(annee)) 
 
-width(
   
 flextable(saisies_tableau) %>%
   set_header_labels(
@@ -179,9 +181,10 @@ flextable(saisies_tableau) %>%
   bold(part = "header") %>% 
   align(j = 2:4, align = "right") %>%   # Aligner à droite les colonnes de saisies
   align(part = "header",j = 2:4, align = "right") %>% 
-  set_caption(caption = paste("Evolution du nombre de saisies",nom_bases))
+  set_caption(caption = paste("Evolution du nombre de saisies",nom_bases)) %>%
   
-, width = 1.5)
+autofit()
+  
 ```
 
 ```{r , fig.width = 6.5 , fig.height = 3.5}
@@ -523,7 +526,6 @@ groupes_espece_tableau <- groupes_espece_tableau %>%
 groupes_espece_tableau$GROUP2_INPN <- groupes_espece_tableau$GROUP2_INPN %>% 
   factor(levels = rev(groupes_espece_tableau$GROUP2_INPN))
 
-width(
   
 flextable(groupes_espece_tableau) %>%
   set_header_labels(
@@ -538,9 +540,9 @@ flextable(groupes_espece_tableau) %>%
   align(j = 2:5, align = "right") %>%   # Aligner à droite les colonnes de saisies
   align(part = "header",j = 2:5, align = "right") %>% 
   set_caption( caption = paste("Nombre de saisies par groupe d'espèces en", params$anne_fin, nom_bases)) %>% 
-  bg(i=nrow(groupes_espece_tableau), bg = "#DDDDDD")
+  bg(i=nrow(groupes_espece_tableau), bg = "#DDDDDD") %>%
   
-, width = 1.5)
+autofit()
 ```
 
 ```{r, results='asis'}
@@ -741,7 +743,6 @@ statuts_espece_par_annee_tableau <- statuts_espece_par_annee %>%
 statuts_espece_par_annee_tableau <- statuts_espece_par_annee_tableau %>%
   mutate(across(-annee, ~ format(., big.mark = " ", decimal.mark = ",", scientific = FALSE, trim = TRUE)))
 
-width(
   
 flextable(statuts_espece_par_annee_tableau) %>%
   set_header_labels(
@@ -755,9 +756,9 @@ flextable(statuts_espece_par_annee_tableau) %>%
   align(j = 2:4, align = "right") %>%   # Aligner à droite les colonnes de saisies
   align(part = "header",j = 2:4, align = "right") %>% 
   set_caption(caption = paste("Evolution du nombre de saisies par statut pour le SD", params$dep, nom_bases)) %>% 
-  set_table_properties(width = 0.8, layout = "autofit")
+  set_table_properties(width = 0.8, layout = "autofit") %>%
   
-, width = 1)
+autofit()
 ```
 
 <br>
@@ -930,7 +931,6 @@ groupes_espece_pro_tableau <- groupes_espece_pro_tableau %>%
 groupes_espece_pro_tableau$GROUP2_INPN <- groupes_espece_pro_tableau$GROUP2_INPN %>% 
   factor(levels = rev(groupes_espece_pro_tableau$GROUP2_INPN))
 
-width(
   
 flextable(groupes_espece_pro_tableau) %>%
   set_header_labels(
@@ -945,9 +945,9 @@ flextable(groupes_espece_pro_tableau) %>%
   align(j = 2:5, align = "right") %>%   # Aligner à droite les colonnes de saisies
   align(part = "header",j = 2:5, align = "right") %>% 
   set_caption( caption = paste("Nombre de saisies par groupe d'espèces protégées en", params$anne_fin, nom_bases)) %>% 
-  bg(i=nrow(groupes_espece_pro_tableau), bg = "#DDDDDD")
+  bg(i=nrow(groupes_espece_pro_tableau), bg = "#DDDDDD") %>%
   
-, width = 1.4)
+autofit()
 ```
 
 <br>
@@ -1238,7 +1238,7 @@ ggplot(observations_espece_pro_seulement) +
 
 -   Les espèces dites "normales" appartiennent à la catégorie "Autres catégories".
 
--   Les espèces dites "menacées" appartiennent à la catégorie "Espèces menacées de disparition de métropôle" ou "Espèces éteintes".
+-   Les espèces dites "menacées" appartiennent à la catégorie "Espèces menacées de disparition en métropole" ou "Espèces éteintes".
 
 -   Les espèces dites "envahissantes" appartiennent à la liste des espèces envahissantes françaises.
 

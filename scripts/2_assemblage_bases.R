@@ -27,7 +27,7 @@ liste_rouge <- read.csv("processed_data/liste_rouge.csv", na = c("")) %>%
   rename(cd_nom = CD_NOM, statut_LR = STATUT, NOM_LR = NOM_CITE) %>%
   mutate(cd_nom = as.character(cd_nom))
 
-# Effectuer la jointure avec left_join et catégoriser les espèces menacées...
+# Effectuer la jointure avec left_join et catégoriser les espèces menacées
 OISON_PMC <- OISON_PMC %>%
   left_join(liste_rouge, by = "cd_nom") %>%
   relocate(statut_LR, .after = GROUP2_INPN) %>%

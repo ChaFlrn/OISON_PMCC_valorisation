@@ -1,6 +1,6 @@
 ---
-title: "Bilan des saisies opportunistes - Région Hauts-de-France"
-author: "OFB DR Hauts-de-France - Service régional Connaissance"
+title: "Bilan des saisies opportunistes - Région Nouvelle-Aquitaine"
+author: "OFB DR Nouvelle-Aquitaine - Service régional Connaissance"
 date: "`r format(Sys.time(), '%d %B %Y')`"
 toc-title: "Sommaire"
 output:
@@ -64,11 +64,18 @@ colors_pmc <- c(
 )
 
 colors_dep <- c(
-  "02" = "#FF6F61",   # Coral
-  "80" = "#a57fc7",   # Violet
-  "62" = "#88B04B",   # Greenery
-  "59" = "#D2AB85",   # Light Brown
-  "60" = "#92A8D1"    # Serenity
+  "16" = "#FF6F61",   
+  "17" = "#3A6EA5",   
+  "19" = "#E3B23C",   
+  "23" = "#9DBE8C",  
+  "24" = "#FF9B85",   
+  "33" = "#B0C4DE",   
+  "40" = "#F3E000",   
+  "47" = "#2C3E50",  
+  "64" = "#C17ECF",   
+  "79" = "#B2957B",    
+  "86" = "#8F5B34",   
+  "87" = "#FFF3B4"   
 )
 
 colors_statut <- c(
@@ -82,16 +89,13 @@ colors_pro <- c(
   "Non protégées" = "darkblue"  # Jaune
 )
 
-# Ouverture des fichiers utiliser dans le Rmarkdown
+# Ouverture des fichiers utilisés dans le Rmarkdown
 OISON_PMC <- st_read("../processed_data/OISON_PMC.gpkg")
 departements <- st_read("../processed_data/departements.gpkg")
 
-# Retirer les données du paraclet
-OISON_PMC <- OISON_PMC %>% 
-  filter(INSEE_COM!="80213")
 
-#Filtrage des données OISON et/ou PMC
-nom_bases <- "(OISON+PMCC)"
+# Filtrage des données OISON et/ou PMC
+nom_bases <- "(OISON + PMCC)"
 
 if(params$OISON=="FALSE"){
   OISON_PMC <- OISON_PMC %>% 
@@ -111,19 +115,18 @@ if(params$PMC=="FALSE" & params$OISON=="FALSE"){
 
 # Introduction
 
-Les données présentées sont issues des bases de données OISON et du réseau-PMCC de l'OFB. Elles font ici l'objet d'un suivi sur le nombre de saisies, le nombre d'observateurs, la saisie moyenne par observateur, les groupes d'espèces, leur statut dans les listes rouges ou envahissantes, les espèces protégées en France et leur répartition géographique.
+Les données présentées sont issues des bases de données OISON et du réseau-PMCC de l'Office français de la biodiversité (OFB). Elles font ici l'objet d'un suivi sur le nombre de saisies, le nombre d'observateurs, la saisie moyenne par observateur, les groupes d'espèces, leur statut dans les listes rouges ou envahissantes, les espèces protégées en France et leur répartition géographique.
 
-Un observateur est relié au département dans lequel il a le plus saisie.
+Un observateur est relié au département dans lequel il a le plus saisi.
 
-Les saisies sur la commune de Cottenchy (80) ont été exclues.
 
 A propos de OISON :
 
 Depuis toujours les agents de l'OFB sur le terrain réalisent des observations qu'ils peuvent maintenant compiler dans un outil informatique permettant la saisie informatique en mode nomade des observations relatives aux espèces et aux milieux. Les données collectées sont majoritairement le résultat d'observations opportunistes ou fortuites, mais elles peuvent aussi être le résultat de la mise en œuvre de protocoles qui se caractérisent par des formulaires simples (nombre de champs réduits).
 
-A propos de rézo-PMCC :
+A propos du réseau-PMCC :
 
-Le réseau Petits et mésocarnivores (PMC) suit l’évolution de la répartition des populations de 14 espèces de carnivores en France métropolitaine, aux statuts règlementaires et de conservation variés. Les connaissances acquises grâce à ce réseau interne permettent à l’Office français de la biodiversité (OFB) d’apporter une expertise technique et scientifique sur ces espèces à tous les niveaux : départemental, régional, national et européen.
+Le réseau Petits et mésocarnivores (PMC) suit l’évolution de la répartition des populations de 14 espèces de carnivores en France métropolitaine, aux statuts règlementaires et de conservation variés. Les connaissances acquises grâce à ce réseau interne permettent à l’OFB d’apporter une expertise technique et scientifique sur ces espèces à tous les niveaux : départemental, régional, national et européen.
 
 \newpage
 
@@ -174,15 +177,22 @@ saisies_tableau <- saisies_tableau %>%
 width(
   
 flextable(saisies_tableau) %>%
-  set_header_labels(
+  set_header_labels( 
     annee = "Année",
-    `02` = "02",
-    `59` = "59",
-    `60` = "60",
-    `62` = "62",
-    `80` = "80",
+    `16` = "16",
+    `17` = "17",
+    `19` = "19",
+    `23` = "23",
+    `24` = "24",
+    `33` = "33",
+    `40` = "40",
+    `47` = "47",
+    `64` = "64",
+    `79` = "79",
+    `86` = "86",
+    `87` = "87",
     total = "Total"
-  ) %>%
+  ) %>%  # renommer les colonnes
   theme_vanilla() %>%
   color(part = "header", color = "white") %>%
   bg(part = "header", bg = "#333333") %>%
@@ -198,7 +208,7 @@ flextable(saisies_tableau) %>%
 
 ```{r , fig.width = 6.5 , fig.height = 3.5}
 ggplot(saisies) +
-  aes(x = annee, y = nombre_saisies, fill = INSEE_DEP) + # Choisi les axes du graphique et la légende
+  aes(x = annee, y = nombre_saisies, fill = INSEE_DEP) + # Choisir les axes du graphique et la légende
   geom_area() +  # Créer un graphique par aire
   scale_fill_manual(values = colors_dep) + # couleurs de la légende
   labs(
@@ -245,7 +255,7 @@ ggplot(saisie_derniere_annee) +
   ) +
   labs(
     fill = "Départements",
-    title = paste("Proportions par département du nombre de saisies en", params$annee_fin, "(OISON+PMC)")
+    title = paste("Proportions par département du nombre de saisies en", params$annee_fin, "(OISON + PMC)")
   ) +
   theme(
     text = element_text(size = 9),
@@ -267,10 +277,12 @@ observateurs <- OISON_PMC %>%
   # Compter le nombre d'observations par observateur et département
   group_by(annee, INSEE_DEP, Observateur) %>%
   summarise(nombre_observations = n(), .groups = 'drop') %>%
+  
   # Trouver le maximum de nombre d'observations par observateur
   group_by(annee, Observateur) %>%
   filter(nombre_observations == max(nombre_observations)) %>%
   ungroup() %>%
+  
   # Déduire le département avec le maximum d'observations pour chaque observateur
   group_by(annee, INSEE_DEP) %>%
   summarise(nombre_observateurs = n_distinct(Observateur), .groups = 'drop')
@@ -312,11 +324,18 @@ width(
 flextable(observateurs_tableau) %>%
   set_header_labels(
     annee = "Année",
-    `02` = "02",
-    `59` = "59",
-    `60` = "60",
-    `62` = "62",
-    `80` = "80",
+    `16` = "16",
+    `17` = "17",
+    `19` = "19",
+    `23` = "23",
+    `24` = "24",
+    `33` = "33",
+    `40` = "40",
+    `47` = "47",
+    `64` = "64",
+    `79` = "79",
+    `86` = "86",
+    `87` = "87",
     total = "Total"
   ) %>%
   theme_vanilla() %>%
@@ -447,13 +466,20 @@ width(
   
 flextable(saisies_observateur_tableau) %>%
   set_header_labels(
-    annee = "Année",
-    `02` = "02",
-    `59` = "59",
-    `60` = "60",
-    `62` = "62",
-    `80` = "80",
-    total = "Région"
+   annee = "Année",
+    `16` = "16",
+    `17` = "17",
+    `19` = "19",
+    `23` = "23",
+    `24` = "24",
+    `33` = "33",
+    `40` = "40",
+    `47` = "47",
+    `64` = "64",
+    `79` = "79",
+    `86` = "86",
+    `87` = "87",
+    total = "Total"
   ) %>%
   theme_vanilla() %>%
   color(part = "header", color = "white") %>%
@@ -663,28 +689,44 @@ totaux <- groupes_espece_tableau %>%
 groupes_espece_tableau <- groupes_espece_tableau %>% 
   bind_rows(totaux) %>% 
   arrange(Région) %>% 
-  mutate(across(-GROUP2_INPN, ~ . / totaux$., .names = "pourc_{.col}")) %>% 
-  mutate(across(starts_with("pourc_"), ~ percent(., big.mark = " ", decimal.mark = ",", accuracy = 1))) %>% 
-  mutate(across(-GROUP2_INPN, ~ format(., big.mark = " ", decimal.mark = ",", scientific = FALSE, trim = TRUE))) %>% 
-  relocate(pourc_02,.after="02") %>% 
-  relocate(pourc_59,.after="59") %>% 
-  relocate(pourc_60,.after="60") %>% 
-  relocate(pourc_62,.after="62") %>% 
-  relocate(pourc_80,.after="80")
+  mutate(across(-GROUP2_INPN,
+                ~ . / totaux[[cur_column()]],
+                .names = "pourc_{.col}")) %>% 
+  mutate(across(starts_with("pourc_"),
+                ~ percent(., big.mark = " ", decimal.mark = ",", accuracy = 1))) %>% 
+  mutate(across(-GROUP2_INPN,
+                ~ format(., big.mark = " ", decimal.mark = ",", scientific = FALSE, trim = TRUE))) %>% 
+  relocate(pourc_16,.after="16") %>% 
+  relocate(pourc_17,.after="17") %>% 
+  relocate(pourc_19,.after="19") %>% 
+  relocate(pourc_23,.after="23") %>% 
+  relocate(pourc_24,.after="24") %>%
+  relocate(pourc_33,.after="33") %>% 
+  relocate(pourc_40,.after="40") %>% 
+  relocate(pourc_47,.after="47") %>% 
+  relocate(pourc_64,.after="64") %>% 
+  relocate(pourc_79,.after="79") %>%
+  relocate(pourc_86,.after="86") %>% 
+  relocate(pourc_87,.after="87") 
 ```
 
 ```{r , fig.width = 6 , fig.height = 3.5}
 
-width(
-  
 flextable(groupes_espece_tableau) %>%
   set_header_labels(
     GROUP2_INPN = "Groupes d'espèce",
-    pourc_02 = "%",
-    pourc_59 = "%",
-    pourc_60 = "%",
-    pourc_62 = "%",
-    pourc_80 = "%",
+    pourc_16 = "%",
+    pourc_17 = "%",
+    pourc_19 = "%",
+    pourc_23 = "%",
+    pourc_24 = "%",
+    pourc_33 = "%",
+    pourc_40 = "%",
+    pourc_47 = "%",
+    pourc_64 = "%",
+    pourc_79 = "%",
+    pourc_86 = "%",
+    pourc_87 = "%",
     pourc_Région = "%"
   ) %>%
   theme_vanilla() %>%
@@ -696,9 +738,9 @@ flextable(groupes_espece_tableau) %>%
   align(j = 2:13, align = "right") %>%   # Aligner à droite les colonnes de saisies
   align(part = "header",j = 2:13, align = "right") %>% 
   set_caption(caption = paste("Nombre de saisies par groupe d'espèces et par département en", params$annee_fin ,nom_bases)) %>% 
-  set_table_properties(width = 0.8, layout = "autofit")
+  set_table_properties(width = 0.8, layout = "autofit") %>%
   
-, width = 0.5)
+ autofit() # ajuste la largeur des colonnes automatiquement, si ne convient pas utiliser "width(width = 0.5)"
 ```
 
 ```{r, results='asis'}
@@ -742,7 +784,7 @@ if (params$OISON) {
     theme_minimal() +
     theme(
       text = element_text(size = 9),
-      plot.title = element_text(size = 10)  # Ajustez la taille du titre ici
+      plot.title = element_text(size = 10)  # Ajuste la taille du titre ici
     )
 }
 ```
@@ -859,8 +901,8 @@ for(i in 1:5){
     vlcex = 0.6,
     color = colors_dep[radar_especes_dep$INSEE_DEP[i+2]],
     data = select(radar_especes_dep[c(1, 2, i + 2), ], -INSEE_DEP),
-    caxislabels = seq.int(0,100,length.out = 5),  # Adjust caxislabels as needed
-    title = radar_especes_dep$INSEE_DEP[i+2]   # Ensure titles is defined
+    caxislabels = seq.int(0,100,length.out = 5),  
+    title = radar_especes_dep$INSEE_DEP[i+2]   
   )
 }
 par(op)
@@ -1075,11 +1117,19 @@ groupes_espece_pro_tableau <- groupes_espece_pro_tableau %>%
   mutate(across(-GROUP2_INPN, ~ . / totaux$., .names = "pourc_{.col}")) %>% 
   mutate(across(starts_with("pourc_"), ~ percent(., big.mark = " ", decimal.mark = ",", accuracy = 1))) %>% 
   mutate(across(-GROUP2_INPN, ~ format(., big.mark = " ", decimal.mark = ",", scientific = FALSE, trim = TRUE))) %>% 
-  relocate(pourc_02,.after="02") %>% 
-  relocate(pourc_59,.after="59") %>% 
-  relocate(pourc_60,.after="60") %>% 
-  relocate(pourc_62,.after="62") %>% 
-  relocate(pourc_80,.after="80")
+  relocate(pourc_16,.after="16") %>% 
+  relocate(pourc_17,.after="17") %>% 
+  relocate(pourc_19,.after="19") %>% 
+  relocate(pourc_23,.after="23") %>% 
+  relocate(pourc_24,.after="24") %>% 
+  relocate(pourc_33,.after="33") %>% 
+  relocate(pourc_40,.after="40") %>% 
+  relocate(pourc_47,.after="47") %>% 
+  relocate(pourc_64,.after="64") %>% 
+  relocate(pourc_79,.after="79") %>% 
+  relocate(pourc_86,.after="86") %>% 
+  relocate(pourc_87,.after="87")  
+
 ```
 
 ```{r , fig.width = 6 , fig.height = 3.5}
@@ -1088,12 +1138,19 @@ width(
   
 flextable(groupes_espece_pro_tableau) %>%
   set_header_labels(
-    GROUP2_INPN = "Groupes d'espèce protégées",
-    pourc_02 = "%",
-    pourc_59 = "%",
-    pourc_60 = "%",
-    pourc_62 = "%",
-    pourc_80 = "%",
+   GROUP2_INPN = "Groupes d'espèces protégées",
+    pourc_16 = "%",
+    pourc_17 = "%",
+    pourc_19 = "%",
+    pourc_23 = "%",
+    pourc_24 = "%",
+    pourc_33 = "%",
+    pourc_40 = "%",
+    pourc_47 = "%",
+    pourc_64 = "%",
+    pourc_79 = "%",
+    pourc_86 = "%",
+    pourc_87 = "%",
     pourc_Région = "%"
   ) %>%
   theme_vanilla() %>%
@@ -1212,7 +1269,7 @@ ggplot(groupes_espece_pro)+
                 label=paste0(GROUP2_INPN, "\n (",pourcentage, "%)")),
                 size = 3)+
   labs(
-    title = paste("Nombre régional de saisies par groupe d'espèce protégées en", params$annee_fin, nom_bases),
+    title = paste("Nombre régional de saisies par groupe d'espèces protégées en", params$annee_fin, nom_bases),
     fill = "Groupes d'espèces"
     ) +
   theme(
@@ -1378,7 +1435,7 @@ ggplot(observations_espece_non_pro) +
 
 -   Les espèces dites "normales" appartiennent à la catégorie "Autres catégories".
 
--   Les espèces dites "menacées" appartiennent à la catégorie "Espèces menacées de disparition de métropôle" ou "Espèces éteintes".
+-   Les espèces dites "menacées" appartiennent à la catégorie "Espèces menacées de disparition en métropole" ou "Espèces éteintes".
 
 -   Les espèces dites "envahissantes" appartiennent à la liste des espèces envahissantes françaises.
 
@@ -1410,7 +1467,7 @@ observateurs_noms_tableau <- OISON_PMC %>%
   # Garder que les colonnes
   select(Observateur,INSEE_DEP)
 
-width(
+
   
 flextable(observateurs_noms_tableau) %>%
   set_header_labels(
@@ -1423,7 +1480,7 @@ flextable(observateurs_noms_tableau) %>%
   bold(part = "header") %>%
   set_caption(caption = paste("Noms des observateurs avec leur département où ils saisissent le plus sur l'année",params$annee_fin,nom_bases)) %>% 
   set_table_properties(width = 0.5, layout = "autofit") %>% 
-  fontsize(part="all",size=7)
+  fontsize(part="all",size=7) %>%
   
-, width = 0.5)
+autofit()
 ```

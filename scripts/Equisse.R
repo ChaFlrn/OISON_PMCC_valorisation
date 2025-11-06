@@ -1,2 +1,0 @@
-library(esquisse)
-esquisse::esquisser()

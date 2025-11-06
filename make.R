@@ -1,11 +1,16 @@
 ##%######################################################%##
 #                                                          #
-####        Bilan réseau PMCC et OISON (OFB HDF)       ####
+####            Valorisation données OISON et PMC          ####
+###            Direction régionale Nouvelle-Aquitaine      ###
 #                                                          #
 ##%------------------------------------------------------%##
 ##%------------------------------------------------------%##  
-####                      N.HOUDANT                     ####
-####          Stage OFB DR. Hauts-de-France             ####
+####                   C. FLORIN                           ####
+###         Chargée de mission analyse de données          ###
+##                 Service Connaissance                    ##
+##%------------------------------------------------------%##
+##            D'après le travail de N.HOUDANT              ##
+##            Stagiaire OFB DR. Hauts-de-France            ##
 #                                                          #
 ##%######################################################%##
 
@@ -23,13 +28,13 @@ source("scripts/1_importation_PMC.R")
 source("scripts/2_assemblage_bases.R")
 
 ##--------------------------------------------------------------------##
-## 2. Création des bilans région et départements`avec les paramètres
+## 2. Création des bilans région et départements avec les paramètres
 
 # Un message s'affiche à l'ouverture des bilans : faire oui
 
 dir.create("output")
 
-list_dep <- c("02","59","80","60","62")
+list_dep <- c("16","17","19","23","24","33","40","47","64","79","86","87")
 
 #LES BILANS DEPARTEMENTAUX
 purrr:: map(.x = list_dep,   
