@@ -342,8 +342,8 @@ flextable(observateurs_tableau) %>%
   color(part = "header", color = "white") %>%
   bg(part = "header", bg = "#333333") %>%
   bold(part = "header") %>% 
-  align(j = 2:7, align = "right") %>%   # Aligner à droite les colonnes de saisies
-  align(part = "header",j = 2:7, align = "right") %>% 
+  align(j = 2:14, align = "right") %>%   # Aligner à droite les colonnes de saisies
+  align(part = "header",j = 2:14, align = "right") %>% 
   set_caption(caption = paste("Evolution du nombre d'observateurs par département",nom_bases))
   
 , width = 1)
@@ -485,8 +485,8 @@ flextable(saisies_observateur_tableau) %>%
   color(part = "header", color = "white") %>%
   bg(part = "header", bg = "#333333") %>%
   bold(part = "header") %>% 
-  align(j = 2:7, align = "right") %>%   # Aligner à droite les colonnes de saisies
-  align(part = "header",j = 2:7, align = "right") %>% 
+  align(j = 2:14, align = "right") %>%   # Aligner à droite les colonnes de saisies
+  align(part = "header",j = 2:14, align = "right") %>% 
   set_caption(caption = paste("Evolution du nombre moyen de saisie par observateur par département",nom_bases))
   
 , width = 1)
@@ -735,8 +735,8 @@ flextable(groupes_espece_tableau) %>%
   bold(part = "header") %>% 
   fontsize(part="all",j = c(3,5,7,9,11,13),size=8) %>%
   bg(i=nrow(groupes_espece_tableau), bg = "#DDDDDD") %>%
-  align(j = 2:13, align = "right") %>%   # Aligner à droite les colonnes de saisies
-  align(part = "header",j = 2:13, align = "right") %>% 
+  align(j = 2:27, align = "right") %>%   # Aligner à droite les colonnes de saisies
+  align(part = "header",j = 2:27, align = "right") %>% 
   set_caption(caption = paste("Nombre de saisies par groupe d'espèces et par département en", params$annee_fin ,nom_bases)) %>% 
   set_table_properties(width = 0.8, layout = "autofit") %>%
   
@@ -1077,8 +1077,8 @@ flextable(espece_pro_par_annee_tableau) %>%
   color(part = "header", color = "white") %>%
   bg(part = "header", bg = "#333333") %>%
   bold(part = "header") %>% 
-  align(j = 2:4, align = "right") %>%   # Aligner à droite les colonnes de saisies
-  align(part = "header",j = 2:4, align = "right") %>% 
+  align(j = 2:7, align = "right") %>%   # Aligner à droite les colonnes de saisies
+  align(part = "header",j = 2:7, align = "right") %>% 
   set_caption(caption = paste("Evolution du nombre régional de saisies d'espèces protégées" ,nom_bases)) %>% 
   set_table_properties(width = 0.8, layout = "autofit")
   
@@ -1159,8 +1159,8 @@ flextable(groupes_espece_pro_tableau) %>%
   bold(part = "header") %>% 
   fontsize(part="all",j = c(3,5,7,9,11,13),size=8) %>%
   bg(i=nrow(groupes_espece_pro_tableau), bg = "#DDDDDD") %>%
-  align(j = 2:13, align = "right") %>%   # Aligner à droite les colonnes de saisies
-  align(part = "header",j = 2:13, align = "right") %>% 
+  align(j = 2:27, align = "right") %>%   # Aligner à droite les colonnes de saisies
+  align(part = "header",j = 2:27, align = "right") %>% 
   set_caption(caption = paste("Nombre de saisies par groupe d'espèces protégées et par échelle en", params$annee_fin ,nom_bases)) %>% 
   set_table_properties(width = 0.8, layout = "autofit")
   
