@@ -2,8 +2,13 @@
 
 # Lire le fichier GPKG et ajouter une colonne annee
 OISON <- st_read("raw_data/OISON_brute.gpkg") %>%
-  mutate(annee = as.integer(substr(date, 1, 4))) %>% 
-  mutate(Observateur = str_extract(email, "^[^@]+"))
+  mutate(annee = as.integer(Annee)) %>% 
+  #mutate(Observateur = str_extract(email, "^[^@]+")) %>%
+  mutate(cd_nom = as.character(Identifiant)) %>%
+  rename(nom_scientifique = NomLatin,
+         nom_vernaculaire = Identifiant.de.taxon,
+         presence = Présence.de.taxon,
+         type_recherche = Type.de.recherche)
 
 OISON <- OISON %>% 
   select(annee,

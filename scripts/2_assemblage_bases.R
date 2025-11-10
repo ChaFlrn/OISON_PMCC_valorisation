@@ -15,6 +15,7 @@ OISON_PMC <- bind_rows(OISON,PMC)
 
 #Importation communes
 communes <- st_read("processed_data/communes.gpkg")
+communes <- st_transform(communes, st_crs(OISON_PMC))
 
 # Jointure spatiale pour  les communes les plus proches des points "geom"
 #(le departement est deja dans le fichier communes.csv)

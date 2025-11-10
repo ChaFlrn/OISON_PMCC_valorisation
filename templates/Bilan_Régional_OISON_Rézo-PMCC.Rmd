@@ -8,7 +8,7 @@ output:
     toc: true
     reference_doc: "reference_doc.docx" # Référence de mise en forme
 params:
-  annee_fin: 2024
+  annee_fin: 2023
   annee_debut: 2020
   OISON: 'TRUE'  # mettre "TRUE"/"FALSE" pour prendre en compte les données OISON ou non
   PMC: 'TRUE'   # mettre "TRUE"/"FALSE" pour prendre en compte les données PMCC ou non
@@ -1077,8 +1077,8 @@ flextable(espece_pro_par_annee_tableau) %>%
   color(part = "header", color = "white") %>%
   bg(part = "header", bg = "#333333") %>%
   bold(part = "header") %>% 
-  align(j = 2:7, align = "right") %>%   # Aligner à droite les colonnes de saisies
-  align(part = "header",j = 2:7, align = "right") %>% 
+  align(j = 2:4, align = "right") %>%   # Aligner à droite les colonnes de saisies
+  align(part = "header",j = 2:4, align = "right") %>% 
   set_caption(caption = paste("Evolution du nombre régional de saisies d'espèces protégées" ,nom_bases)) %>% 
   set_table_properties(width = 0.8, layout = "autofit")
   
@@ -1091,7 +1091,7 @@ flextable(espece_pro_par_annee_tableau) %>%
 groupes_espece_pro_dep <- OISON_PMC %>% 
   group_by(GROUP2_INPN,INSEE_DEP) %>% 
   filter(annee==params$annee_fin) %>% 
-  filter(espece_pro=="Protégées") %>% 
+  filter(espece_pro=="protégée") %>% 
   summarise(nb_saisies = n()) %>% 
   st_set_geometry(NULL) 
 
@@ -1099,36 +1099,40 @@ groupes_espece_pro_dep <- OISON_PMC %>%
 groupes_espece_pro_tableau <- OISON_PMC %>% 
   group_by(GROUP2_INPN) %>% 
   filter(annee==params$annee_fin) %>% 
-  filter(espece_pro=="Protégées") %>%
+  filter(espece_pro=="protégée") %>%
   summarise(nb_saisies = n()) %>% 
   st_set_geometry(NULL) %>% 
   mutate(INSEE_DEP="Région") %>% 
   bind_rows(groupes_espece_pro_dep) %>% 
   dcast(GROUP2_INPN ~ INSEE_DEP, value.var = "nb_saisies", fill = 0)
 
-# Calcul de la ligne "Total" et des pourcentages
+# Calcul de la ligne "Total"
 totaux <- groupes_espece_pro_tableau %>%
   summarise(across(where(is.numeric), sum, na.rm = TRUE)) %>%
   mutate(GROUP2_INPN = "Total")
   
-groupes_espece_pro_tableau <- groupes_espece_pro_tableau %>% 
-  bind_rows(totaux) %>% 
-  arrange(Région) %>% 
-  mutate(across(-GROUP2_INPN, ~ . / totaux$., .names = "pourc_{.col}")) %>% 
-  mutate(across(starts_with("pourc_"), ~ percent(., big.mark = " ", decimal.mark = ",", accuracy = 1))) %>% 
-  mutate(across(-GROUP2_INPN, ~ format(., big.mark = " ", decimal.mark = ",", scientific = FALSE, trim = TRUE))) %>% 
-  relocate(pourc_16,.after="16") %>% 
-  relocate(pourc_17,.after="17") %>% 
-  relocate(pourc_19,.after="19") %>% 
-  relocate(pourc_23,.after="23") %>% 
-  relocate(pourc_24,.after="24") %>% 
-  relocate(pourc_33,.after="33") %>% 
-  relocate(pourc_40,.after="40") %>% 
-  relocate(pourc_47,.after="47") %>% 
-  relocate(pourc_64,.after="64") %>% 
-  relocate(pourc_79,.after="79") %>% 
-  relocate(pourc_86,.after="86") %>% 
-  relocate(pourc_87,.after="87")  
+groupes_espece_pro_tableau <- groupes_espece_pro_tableau %>%
+  bind_rows(totaux)
+
+# Calcul des pourcentages
+num_cols <- names(groupes_espece_pro_tableau)[sapply(groupes_espece_pro_tableau, is.numeric)]
+
+groupes_espece_pro_tableau <- groupes_espece_pro_tableau %>%
+  mutate(across(all_of(num_cols), ~ . / totaux[[cur_column()]], .names = "pourc_{.col}")) %>%
+  mutate(across(starts_with("pourc_"), ~ scales::percent(., big.mark = " ", decimal.mark = ",", accuracy = 1))) %>%
+  mutate(across(all_of(num_cols), ~ format(., big.mark = " ", decimal.mark = ",", scientific = FALSE, trim = TRUE)))
+
+# Relocalisation des colonnes de pourcentage après le département correspondant
+deps <- num_cols  # colonnes numériques originales (ex: "16", "17", "19", ...)
+for(dep in deps){
+  pourc_col <- paste0("pourc_", dep)
+  
+  if(pourc_col %in% names(groupes_espece_pro_tableau) & dep %in% names(groupes_espece_pro_tableau)){
+    groupes_espece_pro_tableau <- groupes_espece_pro_tableau %>%
+      relocate(all_of(pourc_col), .after = all_of(dep))
+  }
+}
+
 
 ```
 

@@ -46,15 +46,7 @@ fr_especes_envahissantes <- fr_especes_envahissantes %>% select(CD_NOM, NOM_CITE
 
 
 # Combiner les bases de données dans l'ordre des dates (et en dernier la liste fr_toute_especes)
-liste_rouge <- bind_rows(hdf_mollusques,
-                         hdf_oiseaux_nicheurs,
-                         hdf_papillons_de_jour,
-                         fr_poissons_eau_douce,
-                         hdf_flore,
-                         nord_airaignees,
-                         nord_amphibiens_reptiles,
-                         picardie_faune,
-                         nord_odonates,
+liste_rouge <- bind_rows(fr_poissons_eau_douce,
                          fr_crustaces_eau_douce,
                          fr_toute_especes,
                          europe_toute_especes,
