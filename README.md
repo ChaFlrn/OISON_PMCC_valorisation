@@ -1,6 +1,7 @@
 # Valorisation des données OISON et PMCC de l'OFB
 ## Objectif
 Ce projet produit des rapports automatisés de l'évolution de la saisies sur les données de l'OFB issues de OISON et du réseau PMCC. 
+
 ## Arborescence du projet
 ### Fichier "Make.R"
 Lancer ce fichier après avoir téléchargé le zip du projet. Lancer les premiers scripts pour créer les fichiers intermédiaires dans processed_data.
@@ -32,6 +33,9 @@ Les données brutes utilisées (OISON et PMC).
 - 3_saisies_observateurs : création de différents graphiques sur les observateurs et leur nombre de saisies
 - Esquisse : aide pour la création de graphiques
 
-
 ### Templates
 Scripts Rmarkdown pour la production des rapports automatisés et la création des graphiques.
+
+
+## Sources
+D'après le travail de N.Houdant, stagiaire de la Direction régionale des Hauts-de-France. 
