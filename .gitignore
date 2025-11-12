@@ -5,3 +5,7 @@
 raw_data
 process_data
 output
+assets/statuts_especes.csv
+*.csv
+*.RData
+*.rds
