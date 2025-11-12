@@ -4,7 +4,7 @@ especes_PMC <- read.csv2("assets/especes_pmc.csv", fileEncoding = "latin1") %>%
   mutate(cd_nom = as.character(cd_nom))
 
 # Importation des données PMCC
-PMC <- read.csv2("raw_data/PMC_brute.csv", fileEncoding = "latin1") # Prendre à partir du serveur
+#PMC <- read.csv2("raw_data/PMC_brute.csv", fileEncoding = "latin1") # Prendre à partir du serveur
 
 PMC <- st_read("raw_data/PMC_brute.gpkg") %>%
   mutate(annee = as.integer(substr(date_obs, 7, 10))) %>% 

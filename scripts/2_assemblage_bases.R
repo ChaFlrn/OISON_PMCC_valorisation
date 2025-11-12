@@ -59,7 +59,9 @@ OISON_PMC <- OISON_PMC %>%
   left_join(liste_especes_pro) %>% 
   mutate(espece_pro = replace_na(espece_pro, "non protégée")) %>% 
   relocate(espece_pro,.after=Origine_LR) %>% 
-  relocate(Nom_espece_pro,.after=NOM_LR)
+  relocate(Nom_espece_pro,.after=NOM_LR) %>%
+  filter(INSEE_DEP == c("16","17","19","23","24","33","40","47","64","79","86","87")) # Filtre les départements
+  
 
 ################### SAUVEGARDE ###############################
 

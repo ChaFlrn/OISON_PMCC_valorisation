@@ -6,9 +6,10 @@ toc-title: "Sommaire"
 output:
   word_document:
     toc: true
+    toc_depth : 2
     reference_doc: "reference_doc.docx" # Référence de mise en forme
 params:
-  annee_fin: 2023
+  annee_fin: 2024
   annee_debut: 2020
   OISON: 'TRUE'  # mettre "TRUE"/"FALSE" pour prendre en compte les données OISON ou non
   PMC: 'TRUE'   # mettre "TRUE"/"FALSE" pour prendre en compte les données PMCC ou non
@@ -29,6 +30,7 @@ library(tidyverse)
 library(tmaptools)
 library(ggplot2)
 library(ggthemes)
+library(ggrepel)
 library(gridExtra)
 library(fmsb) # radarchart
 library(reshape2) # permet de permuter les colonnes et les lignes d'un R.data
@@ -134,10 +136,11 @@ Le réseau Petits et mésocarnivores (PMC) suit l’évolution de la répartitio
 
 ## Evolution du nombre de saisies
 
+L'évolution des saisies `r nom_bases` depuis `r params$annee_debut` est présentée dans le tableau ci-dessous. Les départements sont classés selon l'ordre décroissant du nombre de saisies de la dernière année étudiée, ici `r params$annee_fin`. 
 ```{r}
 saisies <- OISON_PMC %>% 
   st_set_geometry(NULL) %>%                          # Supprime la géométrie des données spatiales
-  filter(annee >= params$annee_debut & annee <= params$annee_fin) %>%  # Filtre les années
+  filter(annee >= params$annee_debut & annee <= params$annee_fin) %>% # Filtre les années
   group_by(annee, INSEE_DEP) %>%                     # Regroupe les données par année et département
   summarise(nombre_saisies = n())                    # Calcule le nombre de saisies par groupe
 
@@ -162,7 +165,6 @@ saisies_histo$INSEE_DEP <- saisies_histo$INSEE_DEP %>%
 ```
 
 <br>
-
 ```{r , fig.width = 6 , fig.height = 3.5}
 # Transformation en tableau croisé dynamique
 saisies_tableau <- saisies %>%
@@ -174,7 +176,8 @@ saisies_tableau <- saisies %>%
 saisies_tableau <- saisies_tableau %>%
   mutate(across(-annee, ~ format(., big.mark = " ", decimal.mark = ",", scientific = FALSE, trim = TRUE)))
 
-width(
+cols_numeric <- which(sapply(saisies_tableau, is.numeric))
+
   
 flextable(saisies_tableau) %>%
   set_header_labels( 
@@ -197,38 +200,21 @@ flextable(saisies_tableau) %>%
   color(part = "header", color = "white") %>%
   bg(part = "header", bg = "#333333") %>%
   bold(part = "header") %>% 
-  align(j = 2:7, align = "right") %>%   # Aligner à droite les colonnes de saisies
-  align(part = "header",j = 2:7, align = "right") %>% 
-  set_caption(caption = paste("Evolution du nombre de saisies par département",nom_bases))
-  
-, width = 1)
+  align(j = cols_numeric, align = "right") %>%   # Aligner à droite les colonnes de saisies
+  align(part = "header",j = cols_numeric, align = "right") %>% 
+  set_caption(caption = paste("Evolution du nombre de saisies par département",nom_bases)) %>%
+  autofit()
 ```
 
 <br>
+<br>
 
-```{r , fig.width = 6.5 , fig.height = 3.5}
-ggplot(saisies) +
-  aes(x = annee, y = nombre_saisies, fill = INSEE_DEP) + # Choisir les axes du graphique et la légende
-  geom_area() +  # Créer un graphique par aire
-  scale_fill_manual(values = colors_dep) + # couleurs de la légende
-  labs(
-    x = "Années",
-    y = "Nombre de saisies",
-    fill = "Départements",
-    title = paste("Evolution du nombre de saisies par département",nom_bases)
-  ) +
-  geom_text(data = filter(saisies, annee == params$annee_fin), # affiche les valeurs de l'année annee_fin
-            aes(label = nombre_saisies, x = annee + 0.2),
-            position = position_stack(vjust = 0.5),
-            size = 3) +
-  theme_minimal() +
-  theme(text = element_text(size = 9))
-```
+Les mêmes résultats que le tableau mais présentés cette fois ci sous forme de graphique. 
 
 ```{r , fig.width = 6.5 , fig.height = 3.5}
 ggplot(saisies_histo) +
   aes(x = INSEE_DEP, y = nombre_saisies, fill = annee) +
-  geom_col(position = "dodge2") +
+  geom_col(position = "dodge2", color = "black") +
   scale_fill_brewer(palette = "Blues") +
   labs(
     x = "Départements",
@@ -241,34 +227,12 @@ ggplot(saisies_histo) +
   theme(text = element_text(size = 9))
 ```
 
-```{r , fig.width = 6.5 , fig.height = 3.5}
-ggplot(saisie_derniere_annee) +
-  aes(x = factor(1), y = pourcentage, fill = INSEE_DEP) +
-  geom_bar(width = 1, stat = "identity", color = "white") +
-  scale_fill_manual(values = colors_dep) +
-  coord_polar(theta = "y") +
-  theme_void() +
-  geom_text(aes(x = 1.2, 
-                y = cumulative, 
-                label = paste(nombre_saisies, "\n", pourcentage, "%")),
-                size = 3
-  ) +
-  labs(
-    fill = "Départements",
-    title = paste("Proportions par département du nombre de saisies en", params$annee_fin, "(OISON + PMC)")
-  ) +
-  theme(
-    text = element_text(size = 9),
-    plot.title = element_text(hjust = 0.2),  # Aligne le titre à gauche
-    legend.margin = margin(t = 0, r = 0, b = 0, l = 50),  # Espace à gauche de la légende
-    plot.margin = margin(t = 1, r = 1, b = 1, l = 1)
-  )
-```
 
 \newpage
 
 ## Evolution du nombre d'observateurs
 
+L'évolution du nombre d'observateurs par département est dressée dans le tableau ci-dessous, de `r params$annee_debut` à `r params$annee_fin`. Les départements sont classés par ordre décroissant en fonction de la dernière année étudiée. 
 ```{r}
 observateurs <- OISON_PMC %>% 
   filter(annee >= params$annee_debut & annee <= params$annee_fin) %>%
@@ -313,13 +277,15 @@ observateurs_histo$INSEE_DEP <- observateurs_histo$INSEE_DEP %>%
 observateurs_tableau <- observateurs %>%
   dcast(annee ~ INSEE_DEP, value.var = "nombre_observateurs", fill = 0) %>% # transforme en tableau
   mutate(total = rowSums(select(., -annee), na.rm = TRUE)) %>% # calcul les totaux
-  mutate(annee = as.character(annee)) # met annee en caractere
+  mutate(annee = as.character(annee)) %>% # met annee en caractere
+  filter(!is.na(INSEE_DEP)) # Supprime les lignes sans la mention du département
 
 # Appliquer le format français aux colonnes appropriées
 observateurs_tableau <- observateurs_tableau %>%
   mutate(across(-annee, ~ format(., big.mark = " ", decimal.mark = ",", scientific = FALSE, trim = TRUE)))
 
-width(
+cols_numeric <- which(sapply(observateurs_tableau, is.numeric))
+
   
 flextable(observateurs_tableau) %>%
   set_header_labels(
@@ -342,73 +308,68 @@ flextable(observateurs_tableau) %>%
   color(part = "header", color = "white") %>%
   bg(part = "header", bg = "#333333") %>%
   bold(part = "header") %>% 
-  align(j = 2:14, align = "right") %>%   # Aligner à droite les colonnes de saisies
-  align(part = "header",j = 2:14, align = "right") %>% 
-  set_caption(caption = paste("Evolution du nombre d'observateurs par département",nom_bases))
-  
-, width = 1)
+  align(j = cols_numeric, align = "right") %>%   # Aligner à droite les colonnes de saisies
+  align(part = "header",j = cols_numeric, align = "right") %>% 
+  set_caption(caption = paste("Evolution du nombre d'observateurs par département",nom_bases)) %>%
+  autofit()
+
+# Déterminer le top 5 des départements selon la dernière année
+top_dep <- observateurs %>%
+  filter(annee == params$annee_fin) %>%
+  arrange(desc(nombre_observateurs)) %>%
+  slice_head(n = 5) %>%
+  pull(INSEE_DEP)
 ```
 
 <br>
+<br>
+Dans ce graphique double : 
+- à gauche: tous les départements
+- à droite :les 5 départements (`r top_dep`) ayant le plus d'observateurs en `r params$annee_fin`.
 
 ```{r , fig.width = 6.5 , fig.height = 3.5}
-ggplot(observateurs) +
-  aes(x = annee, y = nombre_observateurs, fill = INSEE_DEP) +
-  geom_area() +
+# Graphique général
+p_all <- ggplot(observateurs) +
+  aes(x = annee, y = nombre_observateurs, color = INSEE_DEP, group = INSEE_DEP) +
+  geom_line(linewidth = 0.8, alpha = 0.6) +
+  geom_point(size = 1.5, alpha = 0.7) +
   scale_fill_manual(values = colors_dep) +
   labs(
     x = "Années",
     y = "Nombre d'observateurs",
-    fill = "Départements",
-    title = paste("Evolution du nombre d'observateurs par département",nom_bases)
+    color = "Départements",
+    title = "Évolution du nombre d'observateurs par département"
   ) +
-  geom_text(data = filter(observateurs, annee == params$annee_fin),
-            aes(label = nombre_observateurs, x = annee + 0.2),
-            position = position_stack(vjust = 0.5),
-            size = 3) +
-  theme_minimal() +
-  theme(text = element_text(size = 9))
-```
+  theme_minimal(base_size = 9) +
+  theme(legend.position = "bottom")
 
-```{r , fig.width = 6.5 , fig.height = 3.5}
-ggplot(observateurs_histo) +
-  aes(x = INSEE_DEP, y = nombre_observateurs, fill = annee) +
-  geom_col(position = "dodge2") +
-  scale_fill_brewer(palette = "Blues") +
-  labs(
-    x = "Départements",
-    y = "Nombre d'observateurs",
-    fill = "Années",
-    title = paste("Evolution du nombre d'observateurs par département",nom_bases)
-  ) +
-  theme_minimal()+
-  guides(fill = guide_legend(reverse = TRUE)) +
-  theme(text = element_text(size = 9))
-```
 
-```{r , fig.width = 6.5 , fig.height = 3.5}
-ggplot(observateurs_derniere_annee) +
-  aes(x = factor(1), y = pourcentage, fill = INSEE_DEP) +
-  geom_bar(width = 1, stat = "identity", color = "white") +
+
+# Graphique du Top 5
+p_top5 <- ggplot(filter(observateurs, INSEE_DEP %in% top_dep)) +
+  aes(x = annee, y = nombre_observateurs, color = INSEE_DEP, group = INSEE_DEP) +
+  geom_line(linewidth = 1.2) +
+  geom_point(size = 2) +
   scale_fill_manual(values = colors_dep) +
-  coord_polar(theta = "y") +
-  theme_void() +
-  geom_text(aes(x = 1.2, 
-                y = cumulative, 
-                label = paste(nombre_observateurs, "\n", pourcentage, "%")),
-                size = 3
-  ) +
   labs(
-    fill = "Départements",
-    title = paste("Proportions par département du nombre d'observateurs en", params$annee_fin, nom_bases)
+    x = "Années",
+    y = NULL,
+    color = "Top 5 départements",
+    title = paste("Zoom sur le Top 5 des départements (", params$annee_fin, ")", sep = "")
   ) +
+  theme_minimal(base_size = 9) +
   theme(
-    text = element_text(size = 9),
-    plot.title = element_text(hjust = 0.2),  # Aligne le titre à gauche
-    legend.margin = margin(t = 0, r = 0, b = 0, l = 50),  # Espace à gauche de la légende
-    plot.margin = margin(t = 1, r = 1, b = 1, l = 1)
+    legend.position = "right",
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank(),
+    plot.title = element_text(size = 10, face = "bold")
   )
+
+# Assemblage et combinaison des deux graphiques
+p_all + p_top5 + plot_layout(widths = c(2, 1))
+
 ```
+
 
 \newpage
 
@@ -462,6 +423,9 @@ saisies_observateur_tableau <- saisies_observateur %>%
 saisies_observateur_tableau <- saisies_observateur_tableau %>%
   mutate(across(-annee, ~ format(., big.mark = " ", decimal.mark = ",", scientific = FALSE, trim = TRUE)))
 
+cols_numeric <- which(sapply(saisies_observateur_tableau, is.numeric))
+
+
 width(
   
 flextable(saisies_observateur_tableau) %>%
@@ -485,8 +449,8 @@ flextable(saisies_observateur_tableau) %>%
   color(part = "header", color = "white") %>%
   bg(part = "header", bg = "#333333") %>%
   bold(part = "header") %>% 
-  align(j = 2:14, align = "right") %>%   # Aligner à droite les colonnes de saisies
-  align(part = "header",j = 2:14, align = "right") %>% 
+  align(j = cols_numeric, align = "right") %>%   # Aligner à droite les colonnes de saisies
+  align(part = "header",j = cols_numeric, align = "right") %>% 
   set_caption(caption = paste("Evolution du nombre moyen de saisie par observateur par département",nom_bases))
   
 , width = 1)
@@ -711,6 +675,7 @@ groupes_espece_tableau <- groupes_espece_tableau %>%
 ```
 
 ```{r , fig.width = 6 , fig.height = 3.5}
+cols_numeric <- which(sapply(groupes_espece_tableau, is.numeric))
 
 flextable(groupes_espece_tableau) %>%
   set_header_labels(
@@ -733,10 +698,10 @@ flextable(groupes_espece_tableau) %>%
   color(part = "header", color = "white") %>%
   bg(part = "header", bg = "#333333") %>%
   bold(part = "header") %>% 
-  fontsize(part="all",j = c(3,5,7,9,11,13),size=8) %>%
+  fontsize(part="all",j = cols_numeric,size=8) %>%
   bg(i=nrow(groupes_espece_tableau), bg = "#DDDDDD") %>%
-  align(j = 2:27, align = "right") %>%   # Aligner à droite les colonnes de saisies
-  align(part = "header",j = 2:27, align = "right") %>% 
+  align(j = cols_numeric, align = "right") %>%   # Aligner à droite les colonnes de saisies
+  align(part = "header",j = cols_numeric, align = "right") %>% 
   set_caption(caption = paste("Nombre de saisies par groupe d'espèces et par département en", params$annee_fin ,nom_bases)) %>% 
   set_table_properties(width = 0.8, layout = "autofit") %>%
   
@@ -896,7 +861,7 @@ radar_especes_dep <- rbind(rep(100,ncol(radar_especes_dep)),rep(0,ncol(radar_esp
 op <- par(mar = c(1, 1,1,1))
 par(mfrow = c(1,2))
 # Create radar charts
-for(i in 1:5){
+for(i in 1:12){
   create_beautiful_radarchart(
     vlcex = 0.6,
     color = colors_dep[radar_especes_dep$INSEE_DEP[i+2]],
@@ -941,6 +906,9 @@ statuts_espece_par_annee_tableau <- statuts_espece_par_annee %>%
 statuts_espece_par_annee_tableau <- statuts_espece_par_annee_tableau %>%
   mutate(across(-annee, ~ format(., big.mark = " ", decimal.mark = ",", scientific = FALSE, trim = TRUE)))
 
+cols_numeric <- which(sapply(statuts_espece_par_annee_tableau, is.numeric))
+
+
 width(
   
 flextable(statuts_espece_par_annee_tableau) %>%
@@ -952,8 +920,8 @@ flextable(statuts_espece_par_annee_tableau) %>%
   color(part = "header", color = "white") %>%
   bg(part = "header", bg = "#333333") %>%
   bold(part = "header") %>% 
-  align(j = 2:5, align = "right") %>%   # Aligner à droite les colonnes de saisies
-  align(part = "header",j = 2:5, align = "right") %>% 
+  align(j = cols_numeric, align = "right") %>%   # Aligner à droite les colonnes de saisies
+  align(part = "header",j = cols_numeric, align = "right") %>% 
   set_caption(caption = paste("Evolution du nombre régional de saisies par statut" ,nom_bases)) %>% 
   set_table_properties(width = 0.8, layout = "autofit")
   
@@ -1066,6 +1034,9 @@ espece_pro_par_annee_tableau <- espece_pro_par_annee %>%
 espece_pro_par_annee_tableau <- espece_pro_par_annee_tableau %>%
   mutate(across(-annee, ~ format(., big.mark = " ", decimal.mark = ",", scientific = FALSE, trim = TRUE)))
 
+cols_numeric <- which(sapply(espece_pro_par_annee_tableau, is.numeric))
+
+
 width(
   
 flextable(espece_pro_par_annee_tableau) %>%
@@ -1077,8 +1048,8 @@ flextable(espece_pro_par_annee_tableau) %>%
   color(part = "header", color = "white") %>%
   bg(part = "header", bg = "#333333") %>%
   bold(part = "header") %>% 
-  align(j = 2:4, align = "right") %>%   # Aligner à droite les colonnes de saisies
-  align(part = "header",j = 2:4, align = "right") %>% 
+  align(j = cols_numeric, align = "right") %>%   # Aligner à droite les colonnes de saisies
+  align(part = "header",j = cols_numeric, align = "right") %>% 
   set_caption(caption = paste("Evolution du nombre régional de saisies d'espèces protégées" ,nom_bases)) %>% 
   set_table_properties(width = 0.8, layout = "autofit")
   
@@ -1137,6 +1108,8 @@ for(dep in deps){
 ```
 
 ```{r , fig.width = 6 , fig.height = 3.5}
+# Identifier automatiquement les colonnes numériques (ou à aligner)
+cols_numeric <- which(sapply(groupes_espece_pro_tableau, is.numeric))
 
 width(
   
@@ -1161,10 +1134,10 @@ flextable(groupes_espece_pro_tableau) %>%
   color(part = "header", color = "white") %>%
   bg(part = "header", bg = "#333333") %>%
   bold(part = "header") %>% 
-  fontsize(part="all",j = c(3,5,7,9,11,13),size=8) %>%
+  fontsize(part="all",j = cols_numeric,size=8) %>%
   bg(i=nrow(groupes_espece_pro_tableau), bg = "#DDDDDD") %>%
-  align(j = 2:27, align = "right") %>%   # Aligner à droite les colonnes de saisies
-  align(part = "header",j = 2:27, align = "right") %>% 
+  align(j = cols_numeric, align = "right") %>%   # Aligner à droite les colonnes de saisies
+  align(part = "header",j = cols_numeric, align = "right") %>% 
   set_caption(caption = paste("Nombre de saisies par groupe d'espèces protégées et par échelle en", params$annee_fin ,nom_bases)) %>% 
   set_table_properties(width = 0.8, layout = "autofit")
   
