@@ -9,3 +9,4 @@ assets/statuts_especes.csv
 *.csv
 *.RData
 *.rds
+*.txt

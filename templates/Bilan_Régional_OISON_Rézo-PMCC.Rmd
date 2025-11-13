@@ -39,10 +39,10 @@ library(scales) # format des nombres
 
 colors_esp <- c(
   "Arachnides" = "#E41A1C",      # Rouge vif
-  "Autres" = "#377EB8",          # Bleu foncé
-  "Reptiles" = "#4DAF4A",        # Vert
-  "Poissons" = "#984EA3",        # Violet foncé
-  "Angiospermes" = "#FF7F00",    # Orange
+  "Autres" = "#984EA3",          # Bleu foncé
+  "Reptiles" = "#FF7F00",        # Vert
+  "Poissons" = "#00008B",        # Violet foncé
+  "Angiospermes" = "#4DAF4A",    # Orange
   "Amphibiens" = "#FFF333",      # Jaune vif
   "Insectes" = "#A65628",        # Brun
   "Mammifères" = "#F781BF",      # Rose
@@ -137,6 +137,7 @@ Le réseau Petits et mésocarnivores (PMC) suit l’évolution de la répartitio
 ## Evolution du nombre de saisies
 
 L'évolution des saisies `r nom_bases` depuis `r params$annee_debut` est présentée dans le tableau ci-dessous. Les départements sont classés selon l'ordre décroissant du nombre de saisies de la dernière année étudiée, ici `r params$annee_fin`. 
+
 ```{r}
 saisies <- OISON_PMC %>% 
   st_set_geometry(NULL) %>%                          # Supprime la géométrie des données spatiales
@@ -164,7 +165,8 @@ saisies_histo$INSEE_DEP <- saisies_histo$INSEE_DEP %>%
 
 ```
 
-<br>
+
+
 ```{r , fig.width = 6 , fig.height = 3.5}
 # Transformation en tableau croisé dynamique
 saisies_tableau <- saisies %>%
@@ -206,12 +208,13 @@ flextable(saisies_tableau) %>%
   autofit()
 ```
 
-<br>
-<br>
+
+
 
 Les mêmes résultats que le tableau mais présentés cette fois ci sous forme de graphique. 
 
-```{r , fig.width = 6.5 , fig.height = 3.5}
+
+```{r , fig.width = 10 , fig.height = 5}
 ggplot(saisies_histo) +
   aes(x = INSEE_DEP, y = nombre_saisies, fill = annee) +
   geom_col(position = "dodge2", color = "black") +
@@ -233,11 +236,13 @@ ggplot(saisies_histo) +
 ## Evolution du nombre d'observateurs
 
 L'évolution du nombre d'observateurs par département est dressée dans le tableau ci-dessous, de `r params$annee_debut` à `r params$annee_fin`. Les départements sont classés par ordre décroissant en fonction de la dernière année étudiée. 
+
 ```{r}
 observateurs <- OISON_PMC %>% 
   filter(annee >= params$annee_debut & annee <= params$annee_fin) %>%
   st_set_geometry(NULL) %>% 
   select(annee, INSEE_DEP, Observateur) %>%
+  
   # Compter le nombre d'observations par observateur et département
   group_by(annee, INSEE_DEP, Observateur) %>%
   summarise(nombre_observations = n(), .groups = 'drop') %>%
@@ -270,15 +275,15 @@ observateurs_histo$INSEE_DEP <- observateurs_histo$INSEE_DEP %>%
   factor(levels = rev(observateurs_derniere_annee$INSEE_DEP))
 ```
 
-<br>
+
 
 ```{r , fig.width = 6 , fig.height = 3.5}
 # Transformation en tableau croisé
 observateurs_tableau <- observateurs %>%
   dcast(annee ~ INSEE_DEP, value.var = "nombre_observateurs", fill = 0) %>% # transforme en tableau
   mutate(total = rowSums(select(., -annee), na.rm = TRUE)) %>% # calcul les totaux
-  mutate(annee = as.character(annee)) %>% # met annee en caractere
-  filter(!is.na(INSEE_DEP)) # Supprime les lignes sans la mention du département
+  mutate(annee = as.character(annee)) # met annee en caractere
+  
 
 # Appliquer le format français aux colonnes appropriées
 observateurs_tableau <- observateurs_tableau %>%
@@ -321,27 +326,27 @@ top_dep <- observateurs %>%
   pull(INSEE_DEP)
 ```
 
-<br>
-<br>
-Dans ce graphique double : 
-- à gauche: tous les départements
-- à droite :les 5 départements (`r top_dep`) ayant le plus d'observateurs en `r params$annee_fin`.
+Représentation graphique de cette évolution avec un focus sur les 5 départements (`r top_dep`) ayant le plus d'observateurs en `r params$annee_fin`.
 
-```{r , fig.width = 6.5 , fig.height = 3.5}
+```{r , fig.width = 8 , fig.height = 5}
 # Graphique général
-p_all <- ggplot(observateurs) +
+p_all <- ggplot(filter(observateurs, !is.na(INSEE_DEP))) +
   aes(x = annee, y = nombre_observateurs, color = INSEE_DEP, group = INSEE_DEP) +
   geom_line(linewidth = 0.8, alpha = 0.6) +
   geom_point(size = 1.5, alpha = 0.7) +
   scale_fill_manual(values = colors_dep) +
   labs(
-    x = "Années",
+    x = NULL,
     y = "Nombre d'observateurs",
     color = "Départements",
     title = "Évolution du nombre d'observateurs par département"
   ) +
   theme_minimal(base_size = 9) +
-  theme(legend.position = "bottom")
+  theme(axis.text.y = element_text(size = 7),
+        axis.title.y = element_text(size = 6),
+        legend.position = "bottom",
+        legend.direction = "horizontal",
+        legend.box = "horizontal")
 
 
 
@@ -352,21 +357,22 @@ p_top5 <- ggplot(filter(observateurs, INSEE_DEP %in% top_dep)) +
   geom_point(size = 2) +
   scale_fill_manual(values = colors_dep) +
   labs(
-    x = "Années",
-    y = NULL,
-    color = "Top 5 départements",
+    x = NULL,
+    y = "Nombre d'observateurs",
+    color = "Départements",
     title = paste("Zoom sur le Top 5 des départements (", params$annee_fin, ")", sep = "")
   ) +
   theme_minimal(base_size = 9) +
   theme(
     legend.position = "right",
-    axis.text.y = element_blank(),
+    axis.text.y = element_text(size = 7),
+    axis.title.y = element_text(size = 6),
     axis.ticks.y = element_blank(),
-    plot.title = element_text(size = 10, face = "bold")
+    plot.title = element_text(size = 9)
   )
 
 # Assemblage et combinaison des deux graphiques
-p_all + p_top5 + plot_layout(widths = c(2, 1))
+(p_all / p_top5) + plot_layout(widths = c(2, 1))
 
 ```
 
@@ -374,6 +380,8 @@ p_all + p_top5 + plot_layout(widths = c(2, 1))
 \newpage
 
 ## Evolution du nombre moyen de saisie par observateur
+
+L'évolution du nombre moyen de saisie par observateur, de `r params$annee_debut` à `r params$annee_fin`, par département, est présentée dans le tableau ci-dessous. Les départements sont rangés par ordre décroissant en fonction de leur moyenne sur la dernière année étudiée.
 
 ```{r}
 saisies_observateur <- saisies %>%
@@ -400,7 +408,6 @@ saisies_observateur_histo$INSEE_DEP <- saisies_observateur_histo$INSEE_DEP %>%
 
 ```
 
-<br>
 
 ```{r , fig.width = 6 , fig.height = 3.5}
 # Calcul les moyennes totales
@@ -425,8 +432,6 @@ saisies_observateur_tableau <- saisies_observateur_tableau %>%
 
 cols_numeric <- which(sapply(saisies_observateur_tableau, is.numeric))
 
-
-width(
   
 flextable(saisies_observateur_tableau) %>%
   set_header_labels(
@@ -451,47 +456,11 @@ flextable(saisies_observateur_tableau) %>%
   bold(part = "header") %>% 
   align(j = cols_numeric, align = "right") %>%   # Aligner à droite les colonnes de saisies
   align(part = "header",j = cols_numeric, align = "right") %>% 
-  set_caption(caption = paste("Evolution du nombre moyen de saisie par observateur par département",nom_bases))
-  
-, width = 1)
+  set_caption(caption = paste("Evolution du nombre moyen de saisie par observateur par département",nom_bases)) %>%
+  autofit()
 ```
 
-<br>
-
-```{r , fig.width = 6.5 , fig.height = 3.5}
-ggplot(saisies_observateur) +
-  aes(
-    x = annee,
-    y = moyenne_saisies_observateur,
-    colour = INSEE_DEP
-  ) +
-  geom_smooth(se = FALSE) +
-  labs(
-    x = "Années",
-    y = "Saisie moyenne par observateur",
-    color = "Départements",
-    title = paste("Evolution du nombre moyen de saisie par observateur", nom_bases)
-  ) +
-  scale_color_manual(values=colors_dep) +
-  theme_minimal()+
-  theme(text = element_text(size = 9))
-```
-
-```{r , fig.width = 6.5 , fig.height = 3.5}
-ggplot(saisies_observateur_histo) +
-  aes(x = INSEE_DEP, y = moyenne_saisies_observateur, fill = annee) +
-  geom_col(position = "dodge2") +
-  scale_fill_brewer(palette = "Blues") +
-  labs(
-    x = "Départements",
-    y = "Saisie moyenne par observateur",
-    fill = "Années",
-    title = paste("Evolution du nombre moyen de saisie par observateur",nom_bases)
-  ) +
-  theme_minimal()+
-  guides(fill = guide_legend(reverse = TRUE)) +
-  theme(text = element_text(size = 9))
-```
+Les résultats de ce tableau sont illustrés par le graphique ci-dessous.
 
 ```{r}
 saisies_observateur_violon <- OISON_PMC %>%
@@ -503,52 +472,25 @@ saisies_observateur_violon$INSEE_DEP <- saisies_observateur_violon$INSEE_DEP %>%
   factor(levels = rev(saisies_observateur_derniere_annee$INSEE_DEP))
 ```
 
-```{r , fig.width = 6.5 , fig.height = 5, eval=FALSE }
-# eval = FALSE permet de ne pas lancer le programme # le graphique ne s'affiche pas
-
-ggplot(saisies_observateur_violon, aes(x = INSEE_DEP, y = nombre_saisies)) +
-  geom_boxplot(fill = colors_dep, color = "black") +
-  stat_summary(fun = mean, geom = "point", shape = 18, size = 3, color = "red", fill = "red") +
-  labs(
-    x = "Départements",
-    y = "Nombre de saisies par observateur",
-    title = paste("Répartition du nombre de saisies par observateur en",params$annee_fin, nom_bases),
-    caption = "Explications : 
-    - Ligne centrale dans chaque boîte représente la médiane.
-    - Les bords de chaque boîte représentent les 1er et 3e quartiles (Q1 et Q3).
-    - Les 'moustaches' s'étendent jusqu'aux points les plus éloignés qui ne sont pas des valeurs aberrantes.
-    - Les losanges rouges représentent la moyenne."
-  ) +
-  theme_minimal()+
-  theme(plot.caption = element_text(hjust = 0, size = 10, margin = margin(t = 10))) +
-  theme(
-    plot.caption = element_text(hjust = 0, size = 8, margin = margin(t = 10)),
-    text = element_text(size = 9)
-  )
-```
-
-```{r , fig.width = 6.5 , fig.height = 4}
+```{r , fig.width = 10 , fig.height = 6.5}
 ggplot(saisies_observateur_violon, aes(x = INSEE_DEP, y = nombre_saisies, fill=INSEE_DEP)) +
   geom_violin(color = "black") +
   scale_fill_manual(values = colors_dep) +
   stat_summary(fun = mean, geom = "point", shape = 18, size = 3, color = "red", fill="red") +
-  stat_summary(fun = median, geom = "point", shape = 15, size = 2, color = "black",fill="black") +
+  stat_summary(fun = median, geom = "crossbar", width = 0.3, size = 0.6, color = "black",fill="black") +
   labs(
     x = "Départements",
     y = "Nombre de saisies par observateur",
-    fill="Départements",
     title = paste("Répartition du nombre de saisie par observateur en",params$annee_fin, nom_bases),
     caption="Explications :
     - Pour un nombre de saisie donné, plus la zone est large, plus il y a d'observateurs
-    - Le carré noir représente la médiane
+    - Le trait noir représente la médiane
     - Le losange rouge représente la moyenne"
   ) +
   theme_minimal()+
-  theme(plot.caption = element_text(hjust = 0, size = 10, margin = margin(t = 10))) +
-  theme(
-    plot.caption = element_text(hjust = 0, size = 8, margin = margin(t = 10)),
-    text = element_text(size = 9)
-  )
+  theme(plot.caption = element_text(hjust = 0, size = 10, margin = margin(t = 10)),
+        text = element_text(size = 9),
+        legend.position = "none")
 ```
 
 \newpage
@@ -557,6 +499,7 @@ ggplot(saisies_observateur_violon, aes(x = INSEE_DEP, y = nombre_saisies, fill=I
 
 ## Evolution du nombre régional de saisies par groupe d'espèces
 
+L'évolution du nombre régional de saisies par groupes d'espèces est représentée par le graphique ci-dessous. Les données s'étendent de `r params$annee_debut` à `r params$annee_fin`. 
 ```{r}
 groupes_espece_par_annee <- OISON_PMC %>% 
  filter(annee >= params$annee_debut & annee <= params$annee_fin) %>%
@@ -571,6 +514,8 @@ groupes_espece_par_annee$GROUP2_INPN <- factor(groupes_espece_par_annee$GROUP2_I
                                                levels = unique(groupes_espece_par_annee$GROUP2_INPN))
 ```
 
+
+
 ```{r , fig.width = 6.5 , fig.height = 3.5}
 ggplot(groupes_espece_par_annee) +
   aes(x = annee, y = nb_saisies, colour = GROUP2_INPN) +
@@ -584,6 +529,8 @@ ggplot(groupes_espece_par_annee) +
   theme_minimal() +
   theme(text = element_text(size = 9))
 ```
+
+Le graphique suivant analyse ces données selon un point de vue différent, celui des proportions. Le jeu de données utilisé est identique, de `r params$annee_debut` à `r params$annee_fin`. 
 
 ```{r}
 groupes_espece <- OISON_PMC %>% 
@@ -607,7 +554,7 @@ ggplot(groupes_espece)+
   coord_polar(theta = "y")+
   theme_void()+
   scale_fill_manual(values = colors_esp) +
-  geom_text(data=tail(groupes_espece,3),
+  geom_text(data=tail(groupes_espece,5),
             aes(x = 1.8, 
                 y = cumulative, 
                 label=paste0(GROUP2_INPN, "\n (",pourcentage, "%)")),
@@ -626,7 +573,7 @@ ggplot(groupes_espece)+
 
 \newpage
 
-<br> <br>
+
 
 ```{r}
 groupes_espece_dep <- OISON_PMC %>% 
@@ -704,8 +651,7 @@ flextable(groupes_espece_tableau) %>%
   align(part = "header",j = cols_numeric, align = "right") %>% 
   set_caption(caption = paste("Nombre de saisies par groupe d'espèces et par département en", params$annee_fin ,nom_bases)) %>% 
   set_table_properties(width = 0.8, layout = "autofit") %>%
-  
- autofit() # ajuste la largeur des colonnes automatiquement, si ne convient pas utiliser "width(width = 0.5)"
+  autofit() # ajuste la largeur des colonnes automatiquement, si ne convient pas utiliser "width(width = 0.5)"
 ```
 
 ```{r, results='asis'}
@@ -715,6 +661,7 @@ if (params$OISON) {
   cat("## Evolution du nombre régional de saisies par groupe d'espèces hors oiseaux\n")
 }
 ```
+Pour mieux voir les groupes d'espèces, autres que "Oiseaux", il est préférable de faire l'analyse sans ce dernier.
 
 ```{r}
 if (params$OISON) {
@@ -771,6 +718,7 @@ if (params$OISON) {
     factor(levels = rev(groupes_espece_sans_oiseaux$GROUP2_INPN))
 }
 ```
+Représentation graphique des différentes proportions des groupes d'espèces saisis, hors "Oiseaux", pour l'année `r params$annee_fin`.
 
 ```{r , fig.width = 6.5 , fig.height = 3.5}
 if (params$OISON) {
@@ -781,7 +729,7 @@ if (params$OISON) {
     theme_void() +
     scale_fill_manual(values = colors_esp) +
     
-    geom_text(data = tail(groupes_espece_sans_oiseaux, 6),
+    geom_text(data = tail(groupes_espece_sans_oiseaux, 5),
               aes(x = 1.9, 
                   y = cumulative, 
                   label = paste(GROUP2_INPN, "\n", pourcentage, "%")),
@@ -803,7 +751,7 @@ if (params$OISON) {
 
 ## Répartition des saisies d'espèces hors oiseaux par département
 
-<br> Graphiques radars sur les proportions (%) d'espèces saisies hors oiseaux de `r params$annee_debut` à `r params$annee_fin` : <br>
+Graphiques radars sur les proportions (%) d'espèces saisies, hors oiseaux de `r params$annee_debut` à `r params$annee_fin` : 
 
 ```{r}
 # Fonction pour créer des graphiques radars (library(fmsb))
