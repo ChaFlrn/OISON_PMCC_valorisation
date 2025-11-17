@@ -554,7 +554,7 @@ ggplot(groupes_espece)+
   coord_polar(theta = "y")+
   theme_void()+
   scale_fill_manual(values = colors_esp) +
-  geom_text(data=tail(groupes_espece,5),
+  geom_text(data=tail(groupes_espece,3),
             aes(x = 1.8, 
                 y = cumulative, 
                 label=paste0(GROUP2_INPN, "\n (",pourcentage, "%)")),
@@ -572,8 +572,6 @@ ggplot(groupes_espece)+
 ```
 
 \newpage
-
-
 
 ```{r}
 groupes_espece_dep <- OISON_PMC %>% 
@@ -624,21 +622,13 @@ groupes_espece_tableau <- groupes_espece_tableau %>%
 ```{r , fig.width = 6 , fig.height = 3.5}
 cols_numeric <- which(sapply(groupes_espece_tableau, is.numeric))
 
+groupes_espece_tableau_region <- groupes_espece_tableau %>%
+  dplyr::select(GROUP2_INPN, pourc_Région)
+
+
 flextable(groupes_espece_tableau) %>%
   set_header_labels(
     GROUP2_INPN = "Groupes d'espèce",
-    pourc_16 = "%",
-    pourc_17 = "%",
-    pourc_19 = "%",
-    pourc_23 = "%",
-    pourc_24 = "%",
-    pourc_33 = "%",
-    pourc_40 = "%",
-    pourc_47 = "%",
-    pourc_64 = "%",
-    pourc_79 = "%",
-    pourc_86 = "%",
-    pourc_87 = "%",
     pourc_Région = "%"
   ) %>%
   theme_vanilla() %>%
@@ -646,12 +636,13 @@ flextable(groupes_espece_tableau) %>%
   bg(part = "header", bg = "#333333") %>%
   bold(part = "header") %>% 
   fontsize(part="all",j = cols_numeric,size=8) %>%
+  font(fontname = "Arial") %>%
   bg(i=nrow(groupes_espece_tableau), bg = "#DDDDDD") %>%
   align(j = cols_numeric, align = "right") %>%   # Aligner à droite les colonnes de saisies
   align(part = "header",j = cols_numeric, align = "right") %>% 
   set_caption(caption = paste("Nombre de saisies par groupe d'espèces et par département en", params$annee_fin ,nom_bases)) %>% 
   set_table_properties(width = 0.8, layout = "autofit") %>%
-  autofit() # ajuste la largeur des colonnes automatiquement, si ne convient pas utiliser "width(width = 0.5)"
+  width(width = 0.5) # ajuste la largeur des colonnes automatiquement, si ne convient pas utiliser "width(width = 0.5)"
 ```
 
 ```{r, results='asis'}

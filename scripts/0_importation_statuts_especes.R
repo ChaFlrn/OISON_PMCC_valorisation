@@ -12,7 +12,9 @@ taxref <- read_delim(
 statuts_especes_simple <- taxref %>%
   select(CD_NOM, GROUP2_INPN) %>%
   rename(cd_nom = CD_NOM) %>%
-  mutate(cd_nom = as.character(cd_nom)) #%>%
-  #distinct(cd_nom, .keep_all = TRUE)
-  
-write.csv(statuts_especes, file= "processed_data/statuts_especes_simple.csv", row.names=FALSE)
+  mutate(cd_nom = as.character(cd_nom)) %>%
+  distinct(cd_nom, .keep_all = TRUE) 
+
+statuts_especes_simple$GROUP2_INPN <- stri_trans_general(statuts_especes_simple$GROUP2_INPN, "Latin-ASCII") # enlever les accents
+
+write.csv(statuts_especes_simple, file= "processed_data/statuts_especes_simple.csv", row.names=FALSE)
