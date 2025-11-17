@@ -45,7 +45,7 @@ colors_esp <- c(
   "Angiospermes" = "#4DAF4A",    # Orange
   "Amphibiens" = "#FFF333",      # Jaune vif
   "Insectes" = "#A65628",        # Brun
-  "Mammifères" = "#F781BF",      # Rose
+  "Mammiferes" = "#F781BF",      # Rose
   "PMC" = "#D8B365",             # Brun clair
   "Crustacés" = "#66DAA0",       # Vert turquoise
   "Oiseaux" = "#3288BD",         # Bleu clair
@@ -620,13 +620,12 @@ groupes_espece_tableau <- groupes_espece_tableau %>%
 ```
 
 ```{r , fig.width = 6 , fig.height = 3.5}
-cols_numeric <- which(sapply(groupes_espece_tableau, is.numeric))
-
 groupes_espece_tableau_region <- groupes_espece_tableau %>%
   dplyr::select(GROUP2_INPN, pourc_Région)
 
+cols_numeric <- which(sapply(groupes_espece_tableau_region, is.numeric))
 
-flextable(groupes_espece_tableau) %>%
+flextable(groupes_espece_tableau_region) %>%
   set_header_labels(
     GROUP2_INPN = "Groupes d'espèce",
     pourc_Région = "%"
@@ -640,7 +639,7 @@ flextable(groupes_espece_tableau) %>%
   bg(i=nrow(groupes_espece_tableau), bg = "#DDDDDD") %>%
   align(j = cols_numeric, align = "right") %>%   # Aligner à droite les colonnes de saisies
   align(part = "header",j = cols_numeric, align = "right") %>% 
-  set_caption(caption = paste("Nombre de saisies par groupe d'espèces et par département en", params$annee_fin ,nom_bases)) %>% 
+  set_caption(caption = paste("Nombre de saisies par groupe d'espèces au niveau régional en", params$annee_fin ,nom_bases)) %>% 
   set_table_properties(width = 0.8, layout = "autofit") %>%
   width(width = 0.5) # ajuste la largeur des colonnes automatiquement, si ne convient pas utiliser "width(width = 0.5)"
 ```
@@ -746,21 +745,62 @@ Graphiques radars sur les proportions (%) d'espèces saisies, hors oiseaux de `r
 
 ```{r}
 # Fonction pour créer des graphiques radars (library(fmsb))
-create_beautiful_radarchart <- function(data, color = "#00AFBB", 
-                                        vlabels = colnames(data), vlcex = 0.7,
-                                        caxislabels = NULL, title = NULL, plwd = 2,...){
-  radarchart(
-    data, axistype = 1,
-    # Personnaliser le polygone
-    pcol = color, pfcol = scales::alpha(color, 0.5), plwd = 2, plty = 1,
-    # Personnaliser la grille
-    cglcol = "grey", cglty = 1, cglwd = 0.8,
-    # Personnaliser l'axe
-    axislabcol = "grey", 
-    # Étiquettes des variables
-    vlcex = vlcex, vlabels = vlabels,
-    caxislabels = caxislabels, title = title, ...
+create_beautiful_radarchart <- function(
+    data, color = "#00AFBB", 
+    vlabels = colnames(data), 
+    vlcex = NULL,
+    caxislabels = NULL, 
+    title = NULL, 
+    plwd = 2,
+    label_offset = 1.25,
+    ...){
+  
+# Taille automatique des labels en fonction du nombre de variables
+  if (is.null(vlcex)) {
+    nvars <- ncol(data)
+    vlcex <- max(0.4, 1.2 - nvars * 0.03)   # diminution progressive
+}
+  
+# Réglage des marges
+par(mar = c(1.5, 1.5, 2, 1.5))  
+
+radarchart(
+    data, 
+    axistype = 1,
+    
+# Personnaliser le polygone
+pcol = color, 
+pfcol = scales::alpha(color, 0.5), 
+plwd = 2, plty = 1,
+    
+# Personnaliser la grille
+cglcol = "grey70", 
+cglty = 1, 
+cglwd = 0.8,
+    
+# Personnaliser l'axe
+axislabcol = "grey40", 
+  
+# Étiquettes des variables
+vlcex = vlcex, 
+vlabels = vlabels,
+seg = 5,
+caxislabels = caxislabels, 
+title = title, ...
   )
+
+# Rotation & reposition d’étiquettes : hack fmsb
+# On dessine des labels en dehors, à une distance plus grande
+angles <- seq(0, 2*pi, length.out = length(vlabels) + 1)[-1]
+
+r <- max(data[1, ]) * label_offset
+
+  for (i in seq_along(vlabels)) {
+    x <- r * sin(angles[i])
+    y <- r * cos(angles[i])
+    text(x, y, labels = vlabels[i], cex = vlcex, xpd = TRUE)
+  }
+
 }
 ```
 
@@ -794,22 +834,41 @@ radar_especes_dep <- radar_especes_dep %>%
 radar_especes_dep <- rbind(rep(100,ncol(radar_especes_dep)),rep(0,ncol(radar_especes_dep)), radar_especes_dep)
 ```
 
-```{r , fig.width = 6.5 , fig.height = 2.5}
+```{r , fig.width = 20 , fig.height = 15}
 # Réduire la marge du graphique à l'aide de par()
 # Diviser l'écran en 3 parties
-op <- par(mar = c(1, 1,1,1))
-par(mfrow = c(1,2))
-# Create radar charts
+op <- par(mfrow = c(2,2), mar = c(2,2,3,2))
+
 for(i in 1:12){
+
   create_beautiful_radarchart(
-    vlcex = 0.6,
+    vlcex = 1,
     color = colors_dep[radar_especes_dep$INSEE_DEP[i+2]],
-    data = select(radar_especes_dep[c(1, 2, i + 2), ], -INSEE_DEP),
-    caxislabels = seq.int(0,100,length.out = 5),  
-    title = radar_especes_dep$INSEE_DEP[i+2]   
+    data = dplyr::select(radar_especes_dep[c(1, 2, i + 2), ], -INSEE_DEP),
+    caxislabels = seq(0, 100, length.out = 6),
+    label_offset = 1.4,   # plus de marge !
+    title = radar_especes_dep$INSEE_DEP[i+2]
   )
 }
+
 par(op)
+
+# Créer un pdf regroupant tous les graphiques radars, un par page et par département
+#pdf("radars_departements.pdf", width = 8, height = 8)
+
+#for(i in 1:12){
+#create_beautiful_radarchart(
+#    color = colors_dep[radar_especes_dep$INSEE_DEP[i+2]],
+#    data = dplyr::select(radar_especes_dep[c(1, 2, i + 2), ], -INSEE_DEP),
+#    caxislabels = seq(0,100,length.out = 6),
+#    title = paste("Département", radar_especes_dep$INSEE_DEP[i+2])
+#  )
+#}
+
+#dev.off()
+
+
+
 ```
 
 \newpage

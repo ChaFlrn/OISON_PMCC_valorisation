@@ -17,4 +17,6 @@ statuts_especes_simple <- taxref %>%
 
 statuts_especes_simple$GROUP2_INPN <- stri_trans_general(statuts_especes_simple$GROUP2_INPN, "Latin-ASCII") # enlever les accents
 
+statuts_especes_simple$GROUP2_INPN[statuts_especes_simple$GROUP2_INPN == "Hepatiques et Anthocerotes"] <- "Bryophytes"
+
 write.csv(statuts_especes_simple, file= "processed_data/statuts_especes_simple.csv", row.names=FALSE)
