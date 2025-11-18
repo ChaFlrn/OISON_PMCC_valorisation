@@ -12,7 +12,7 @@ params:
   annee_debut: 2020
   OISON: 'TRUE'  # mettre "TRUE"/"FALSE" pour prendre en compte les données OISON ou non
   PMC: 'TRUE'   # mettre "TRUE"/"FALSE" pour prendre en compte les données PMCC ou non
-  dep: "80" # CHOISIR LE DEPARTEMENT
+  dep: '16'  # CHOISIR LE DEPARTEMENT
 ---
 
 ```{r setup, include = FALSE}
@@ -80,15 +80,16 @@ colors_dep <- c(
 )
 
 colors_statut <- c(
-  "Envahissantes" = "#F77F00",   # Orange
-  "Menacées" = "#3DAF2A",        # Vert clair
-  "Normales" = "#377EB8"      # Bleu clair
+  "envahissante" = "#4E342E",   # Orange
+  "menacée" = "#E67E22",        # Vert clair
+  "normale" = "#377EB8"      # Bleu clair
 )
 
 colors_pro <- c(
-  "Protégées" = "darkgreen",   # Vert
-  "Non protégées" = "darkblue"  # Jaune
+  "protégée" = "darkgreen",   # Vert
+  "non protégée" = "darkblue"  # Jaune
 )
+
 
 # Ouverture des fichiers utiliser dans le Rmarkdown
 OISON_PMC <- st_read("../processed_data/OISON_PMC.gpkg")
@@ -182,8 +183,7 @@ flextable(saisies_tableau) %>%
   align(j = 2:4, align = "right") %>%   # Aligner à droite les colonnes de saisies
   align(part = "header",j = 2:4, align = "right") %>% 
   set_caption(caption = paste("Evolution du nombre de saisies",nom_bases)) %>%
-  
-autofit()
+  autofit()
   
 ```
 
@@ -253,7 +253,6 @@ observateurs_tableau <- observateurs_tableau %>%
                 ~ format(., big.mark = " ", decimal.mark = ",", scientific = FALSE, trim = TRUE))) %>%
   mutate(annee = as.character(annee)) 
 
-width(
   
 flextable(observateurs_tableau) %>%
   set_header_labels(
@@ -267,9 +266,9 @@ flextable(observateurs_tableau) %>%
   bold(part = "header") %>% 
   align(j = 2:4, align = "right") %>%   # Aligner à droite les colonnes de saisies
   align(part = "header",j = 2:4, align = "right") %>% 
-  set_caption(caption = paste("Evolution du nombre d'observateurs",nom_bases))
-  
-, width = 1.5)
+  set_caption(caption = paste("Evolution du nombre d'observateurs",nom_bases)) %>%
+  autofit()
+
 ```
 
 <br>
@@ -299,11 +298,11 @@ ggplot(observateurs_dep) +
 
 ```{r}
 saisies_observateur_dep <- saisies_dep %>%
-  left_join(observateurs) %>%
+  left_join(observateurs_dep) %>%
   mutate(moyenne_saisies_observateur_dep =
            ifelse(!is.na(nombre_observateurs_dep)
                   & nombre_observateurs_dep > 0, 
-                  round(nombre_saisies / nombre_observateurs_dep,1), 
+                  round(nombre_saisies_dep / nombre_observateurs_dep,1), 
                   0)) %>% 
   select(annee,INSEE_DEP,moyenne_saisies_observateur_dep)
 
@@ -334,8 +333,7 @@ saisies_observateur_tableau <- saisies_observateur_tableau %>%
                 ~ format(., big.mark = " ", decimal.mark = ",", scientific = FALSE, trim = TRUE))) %>%
   mutate(annee = as.character(annee)) 
 
-width(
-  
+
 flextable(saisies_observateur_tableau) %>%
   set_header_labels(
     annee = "Année",
@@ -348,9 +346,8 @@ flextable(saisies_observateur_tableau) %>%
   bold(part = "header") %>% 
   align(j = 2:4, align = "right") %>%   # Aligner à droite les colonnes de saisies
   align(part = "header",j = 2:4, align = "right") %>% 
-  set_caption(caption = paste("Evolution du nombre moyen de saisies par observateurs", nom_bases))
-  
-, width = 1.5)
+  set_caption(caption = paste("Evolution du nombre moyen de saisies par observateurs", nom_bases)) %>%
+  autofit()
 ```
 
 <br>
@@ -389,7 +386,7 @@ saisies_observateur_violon <- OISON_PMC %>%
 ggplot(saisies_observateur_violon, aes(x = factor(INSEE_DEP), y = nombre_saisies, fill=INSEE_DEP)) +
   geom_violin(color = "black") +
   scale_fill_manual(values = colors_dep) +
-  stat_summary(fun = mean, geom = "point", shape = 18, size = 3, color = "red", fill = "red") +
+  stat_summary(fun = mean, geom = "point", shape = 18, size = 3, color = "yellow", fill = "yellow") +
   stat_summary(fun = median, geom = "point", shape = 15, size = 2, color = "black",fill="black") +
   labs(
     x = "Département",
@@ -398,7 +395,7 @@ ggplot(saisies_observateur_violon, aes(x = factor(INSEE_DEP), y = nombre_saisies
     caption = "Explications :
     - Pour un nombre de saisie donné, plus la zone est large, plus il y a d'observateurs
     - Le carré noir représente la médiane.
-    - Le losange rouge représente la moyenne"
+    - Le losange jaune représente la moyenne"
   ) +
   theme_minimal()+
   theme(plot.caption = element_text(hjust = 0, size = 10, margin = margin(t = 10))) +
@@ -651,9 +648,9 @@ create_beautiful_radarchart <- function(data, color = "#00AFBB",
     # Personnaliser le polygone
     pcol = color, pfcol = scales::alpha(color, 0.5), plwd = 2, plty = 1,
     # Personnaliser la grille
-    cglcol = "grey", cglty = 1, cglwd = 0.8,
+    cglcol = "grey70", cglty = 1, cglwd = 0.8,
     # Personnaliser l'axe
-    axislabcol = "grey", 
+    axislabcol = "grey20", 
     # Étiquettes des variables
     vlcex = vlcex, vlabels = vlabels,
     caxislabels = caxislabels, title = title, ...
@@ -819,24 +816,25 @@ ggplot(statuts_espece)+
   )
 ```
 
-```{r , fig.width = 6.5 , fig.height = 3.5}
+```{r , fig.width = 3.5 , fig.height = 3.5}
 statuts_espece_dep <- OISON_PMC %>% 
   filter(INSEE_DEP==params$dep) %>% 
   filter(annee==params$annee_fin) %>% 
   filter(!is.na(statut_LR))
 
 ggplot(statuts_espece_dep) +
-  aes(x = statut_LR, fill = INSEE_DEP) +
+  aes(x = statut_LR, fill = statut_LR) +
   geom_bar(position = "dodge2") +
-  scale_fill_manual(values = colors_dep) +
+  scale_fill_manual(values = colors_statut) +
   labs(
     x = "Statuts",
     y = "Nombre de saisies",
-    fill = "Départements",
+    fill = "Statuts",
     title = paste("Nombre de saisies par statuts d'espèces pour le SD", params$dep,"en", params$annee_fin, nom_bases)) +
   theme_minimal() +
   theme(text = element_text(size = 9),
-        legend.margin = margin(t = 0, r = 200, b = 0, l = 0))
+        legend.margin = margin(t = 0, r = 200, b = 0, l = 0),
+        legend.position = "none")
 ```
 
 \newpage
@@ -870,7 +868,6 @@ espece_pro_par_annee_tableau <- espece_pro_par_annee %>%
 espece_pro_par_annee_tableau <- espece_pro_par_annee_tableau %>%
   mutate(across(-annee, ~ format(., big.mark = " ", decimal.mark = ",", scientific = FALSE, trim = TRUE)))
 
-width(
   
 flextable(espece_pro_par_annee_tableau) %>%
   set_header_labels(
@@ -883,9 +880,10 @@ flextable(espece_pro_par_annee_tableau) %>%
   bold(part = "header") %>% 
   align(j = 2:4, align = "right") %>%   # Aligner à droite les colonnes de saisies
   align(part = "header",j = 2:4, align = "right") %>% 
-  set_caption(caption = paste("Evolution du nombre de saisies des espèces protégées pour le SD", params$dep, nom_bases))
+  set_caption(caption = paste("Evolution du nombre de saisies des espèces protégées pour le SD", params$dep, nom_bases)) %>%
+  autofit()
   
-, width = 1.4)
+
 ```
 
 <br>
@@ -895,7 +893,7 @@ flextable(espece_pro_par_annee_tableau) %>%
 groupes_espece_pro_reg <- OISON_PMC %>% 
   group_by(GROUP2_INPN) %>% 
   filter(!is.na(GROUP2_INPN)) %>% 
-  filter(espece_pro=="Protégées") %>%
+  filter(espece_pro=="protégée") %>%
   filter(annee==params$annee_fin) %>% 
   summarise(nb_saisies_reg = n()) %>% 
   st_set_geometry(NULL) 
@@ -904,7 +902,7 @@ groupes_espece_pro_reg <- OISON_PMC %>%
 groupes_espece_pro_tableau <- OISON_PMC %>%
   filter(INSEE_DEP==params$dep) %>% 
   filter(!is.na(GROUP2_INPN)) %>% 
-  filter(espece_pro=="Protégées") %>%
+  filter(espece_pro=="protégée") %>%
   filter(annee==params$annee_fin) %>% 
   group_by(GROUP2_INPN) %>% 
   summarise(nb_saisies = n()) %>% 
@@ -1007,24 +1005,25 @@ ggplot(espece_pro)+
   )
 ```
 
-```{r , fig.width = 6.5 , fig.height = 3.5}
+```{r , fig.width = 3.5 , fig.height = 3.5}
 espece_pro_dep <- OISON_PMC %>% 
   filter(INSEE_DEP==params$dep) %>% 
   filter(annee==params$annee_fin) %>% 
   filter(!is.na(espece_pro))
 
 ggplot(espece_pro_dep) +
-  aes(x = espece_pro, fill = INSEE_DEP) +
+  aes(x = espece_pro, fill = espece_pro) +
   geom_bar(position = "dodge2") +
-  scale_fill_manual(values = colors_dep) +
+  scale_fill_manual(values = colors_pro) +
   labs(
     x = "Réglementation",
     y = "Nombre de saisies",
     fill = "Départements",
-    title = paste("Nombre de saisies des espèces protégées pour le SD", params$dep,"en", params$annee_fin, nom_bases)) +
+    title = paste("Nombre de saisies des espèces protégées \npour le SD", params$dep,"en", params$annee_fin, nom_bases)) +
   theme_minimal() +
   theme(text = element_text(size = 9),
-        legend.margin = margin(t = 0, r = 200, b = 0, l = 0))
+        legend.margin = margin(t = 0, r = 200, b = 0, l = 0),
+        legend.position = "none")
 ```
 
 
@@ -1034,7 +1033,7 @@ groupes_espece_pro <- OISON_PMC %>%
   filter(INSEE_DEP==params$dep) %>% 
   filter(!is.na(GROUP2_INPN)) %>% 
   filter(annee==params$annee_fin) %>% 
-  filter(espece_pro=="Protégées") %>% 
+  filter(espece_pro=="protégée") %>% 
   summarise(nb_saisies = n()) %>% 
   st_set_geometry(NULL) %>% 
   arrange(nb_saisies) %>% 
@@ -1125,7 +1124,7 @@ ggplot(observations_statut) +
 observations_statut_normale <- OISON_PMC %>% 
   filter(INSEE_DEP==params$dep) %>% 
   filter(annee >= params$annee_debut & annee <= params$annee_fin) %>% 
-  filter(statut_LR=="Normales")
+  filter(statut_LR=="normale")
 ```
 
 ```{r , fig.width = 6.5 , fig.height = 3.5}
@@ -1143,7 +1142,7 @@ ggplot(observations_statut_normale) +
 observations_statut_menacee <- OISON_PMC %>%
   filter(INSEE_DEP==params$dep) %>% 
   filter(annee >= params$annee_debut & annee <= params$annee_fin) %>%
-  filter(statut_LR=="Menacées")
+  filter(statut_LR=="menacée")
 ```
 
 ```{r , fig.width = 6.5 , fig.height = 3.5}
@@ -1161,7 +1160,7 @@ ggplot(observations_statut_menacee) +
 observations_statut_envahissante <- OISON_PMC %>%
   filter(INSEE_DEP==params$dep) %>% 
   filter(annee >= params$annee_debut & annee <= params$annee_fin) %>%
-  filter(statut_LR=="Envahissantes")
+  filter(statut_LR=="envahissante")
 ```
 
 ```{r , fig.width = 6.5 , fig.height = 3.5}
@@ -1198,7 +1197,7 @@ ggplot(observations_espece_pro) +
 observations_espece_pro_seulement <- OISON_PMC %>% 
   filter(INSEE_DEP==params$dep) %>%
   filter(annee >= params$annee_debut & annee <= params$annee_fin) %>% 
-  filter(espece_pro=="Protégées")
+  filter(espece_pro=="protégée")
 ```
 
 ```{r , fig.width = 6.5 , fig.height = 3.5}
@@ -1216,7 +1215,7 @@ ggplot(observations_espece_pro_seulement) +
 observations_espece_pro_seulement <- OISON_PMC %>% 
   filter(INSEE_DEP==params$dep) %>%
   filter(annee >= params$annee_debut & annee <= params$annee_fin) %>% 
-  filter(espece_pro=="Non protégées")
+  filter(espece_pro=="non protégée")
 ```
 
 ```{r , fig.width = 6.5 , fig.height = 3.5}

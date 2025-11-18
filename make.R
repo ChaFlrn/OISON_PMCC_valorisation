@@ -42,16 +42,16 @@ purrr:: map(.x = list_dep,
               rmarkdown::render(input = "templates/Bilan_Départemental_OISON_Rézo-PMCC.Rmd",
                                 output_file = paste0("../output/Bilan_SD-", .x, "_OISON_Rézo-PMCC.docx"),
                                 params= list(dep = .x, 
-                                             annee_fin= 2023,   # CHANGER SI BESOIN
-                                             annee_debut= 2020,  # CHANGER SI BESOIN
-                                             OISON= 'TRUE',  # mettre "TRUE"/"FALSE" pour prendre en compte les données OISON ou non
-                                             PMC= 'TRUE'   # mettre "TRUE"/"FALSE" pour prendre en compte les données PMCC ou non
+                                             annee_fin = 2024,   # CHANGER SI BESOIN
+                                             annee_debut = 2020,  # CHANGER SI BESOIN
+                                             OISON = 'TRUE',  # mettre "TRUE"/"FALSE" pour prendre en compte les données OISON ou non
+                                             PMC = 'TRUE'   # mettre "TRUE"/"FALSE" pour prendre en compte les données PMCC ou non
                                             )))
 # LE BILAN REGIONAL
 rmarkdown::render(input = "templates/Bilan_Régional_OISON_Rézo-PMCC.Rmd",
                   output_file = paste0("../output/Bilan_Régional_OISON_Rézo-PMCC.docx"),
-                  params= list(annee_fin= 2024,   # CHANGER SI BESOIN
-                               annee_debut= 2020,  # CHANGER SI BESOIN
-                               OISON= 'TRUE',  # mettre "TRUE"/"FALSE" pour prendre en compte les données OISON ou non
-                               PMC= 'TRUE'   # mettre "TRUE"/"FALSE" pour prendre en compte les données PMCC ou non
+                  params= list(annee_fin = 2024,   # CHANGER SI BESOIN
+                               annee_debut = 2020,  # CHANGER SI BESOIN
+                               OISON = 'TRUE',  # mettre "TRUE"/"FALSE" pour prendre en compte les données OISON ou non
+                               PMC = 'TRUE'   # mettre "TRUE"/"FALSE" pour prendre en compte les données PMCC ou non
                                 ))
