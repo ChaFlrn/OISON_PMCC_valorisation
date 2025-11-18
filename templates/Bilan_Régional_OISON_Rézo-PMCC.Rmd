@@ -81,8 +81,8 @@ colors_dep <- c(
 )
 
 colors_statut <- c(
-  "envahissante" = "#F77F00",   # Orange
-  "menacée" = "#3DAF2A",        # Vert clair
+  "envahissante" = "#4E342E",   # Orange
+  "menacée" = "#E67E22",        # Vert clair
   "normale" = "#377EB8"      # Bleu clair
 )
 
@@ -166,7 +166,6 @@ saisies_histo$INSEE_DEP <- saisies_histo$INSEE_DEP %>%
 ```
 
 
-
 ```{r , fig.width = 6 , fig.height = 3.5}
 # Transformation en tableau croisé dynamique
 saisies_tableau <- saisies %>%
@@ -207,7 +206,6 @@ flextable(saisies_tableau) %>%
   set_caption(caption = paste("Evolution du nombre de saisies par département",nom_bases)) %>%
   autofit()
 ```
-
 
 
 
@@ -423,7 +421,7 @@ saisies_observateur_moy <- OISON_PMC %>%
 saisies_observateur_tableau <- saisies_observateur %>%
   mutate(moyenne_saisies_observateur=round(moyenne_saisies_observateur,1)) %>%  # arrondi les moyennes
   dcast(annee ~ INSEE_DEP, value.var = "moyenne_saisies_observateur", fill = 1) %>% # transforme en tableau
-  mutate(total=saisies_observateur_moy$moyenne_saisies_observateur) %>%  # ajoute les moyennes totales
+  mutate(moyenne=saisies_observateur_moy$moyenne_saisies_observateur) %>%  # ajoute les moyennes totales
   mutate(annee = as.character(annee)) # met annee en caractere
 
 # Appliquer le format français aux colonnes appropriées
@@ -448,7 +446,7 @@ flextable(saisies_observateur_tableau) %>%
     `79` = "79",
     `86` = "86",
     `87` = "87",
-    total = "Total"
+    moyenne = "Moyenne"
   ) %>%
   theme_vanilla() %>%
   color(part = "header", color = "white") %>%
@@ -514,8 +512,6 @@ groupes_espece_par_annee$GROUP2_INPN <- factor(groupes_espece_par_annee$GROUP2_I
                                                levels = unique(groupes_espece_par_annee$GROUP2_INPN))
 ```
 
-
-
 ```{r , fig.width = 6.5 , fig.height = 3.5}
 ggplot(groupes_espece_par_annee) +
   aes(x = annee, y = nb_saisies, colour = GROUP2_INPN) +
@@ -531,6 +527,7 @@ ggplot(groupes_espece_par_annee) +
 ```
 
 Le graphique suivant analyse ces données selon un point de vue différent, celui des proportions. Le jeu de données utilisé est identique, de `r params$annee_debut` à `r params$annee_fin`. 
+
 
 ```{r}
 groupes_espece <- OISON_PMC %>% 
@@ -713,6 +710,7 @@ if (params$OISON) {
 ```
 Représentation graphique des différentes proportions des groupes d'espèces saisis, hors "Oiseaux", pour l'année `r params$annee_fin`.
 
+
 ```{r , fig.width = 6.5 , fig.height = 3.5}
 if (params$OISON) {
   ggplot(groupes_espece_sans_oiseaux) +
@@ -740,12 +738,8 @@ if (params$OISON) {
 }
 ```
 
-\newpage
-
 ## Répartition des saisies d'espèces hors oiseaux par département
-
-Graphiques radars sur les proportions (%) d'espèces saisies, hors oiseaux de `r params$annee_debut` à `r params$annee_fin` : 
-
+Graphiques radars sur les proportions (%) d'espèces saisies, hors oiseaux de `r params$annee_debut` à `r params$annee_fin`.
 ```{r}
 # Fonction pour créer des graphiques radars (library(fmsb))
 create_beautiful_radarchart <- function(
@@ -765,7 +759,7 @@ create_beautiful_radarchart <- function(
 }
   
 # Réglage des marges
-par(mar = c(1.5, 1.5, 2, 1.5))  
+par(mar = c(1, 1, 1.5, 1))  
 
 radarchart(
     data, 
@@ -837,10 +831,10 @@ radar_especes_dep <- radar_especes_dep %>%
 radar_especes_dep <- rbind(rep(100,ncol(radar_especes_dep)),rep(0,ncol(radar_especes_dep)), radar_especes_dep)
 ```
 
-```{r , fig.width = 20 , fig.height = 15}
+```{r , fig.width = 14 , fig.height = 14}
 # Réduire la marge du graphique à l'aide de par()
 # Diviser l'écran en 3 parties
-op <- par(mfrow = c(2,2), mar = c(2,2,3,2))
+op <- par(mfrow = c(2,2), mar = c(1,1,2,1))
 
 for(i in 1:12){
 
@@ -849,7 +843,7 @@ for(i in 1:12){
     color = colors_dep[radar_especes_dep$INSEE_DEP[i+2]],
     data = dplyr::select(radar_especes_dep[c(1, 2, i + 2), ], -INSEE_DEP),
     caxislabels = seq(0, 100, length.out = 6),
-    label_offset = 1.4,   # plus de marge !
+    label_offset = 1.4,   # plus de marge 
     title = radar_especes_dep$INSEE_DEP[i+2]
   )
 }
@@ -879,9 +873,15 @@ par(op)
 # Evolution des saisies d'espèces menacées et envahissantes
 
 ## Evolution du nombre régional de saisies par statut
-L'évolution du nombre régional de saisies par statut est présentée dans le tableau ci-dessous, pour les années `r params$annee_debut` à `r params$annee_fin`. Les statuts sont fonction de : 
-- normale : toutes les autres espèces non concernées par le statut "menacée" ou "envahissante"
+L'évolution du nombre régional de saisies par statut est présentée dans le tableau ci-dessous, pour les années `r params$annee_debut` à `r params$annee_fin`. Les statuts sont fonction de :
+
+
+- normale : espèces classées "autres catégories" dans les listes rouges nationales
+
+
 - menacée : espèces des catégories "RE", "EN", "VU", "CR", "CR*", des listes rouges nationales et régionales
+
+
 - envahissante : liste nationale des espèces classées "envahissantes"
 ```{r}
 statuts_espece_par_annee <- OISON_PMC %>% 
@@ -896,9 +896,6 @@ statuts_espece_par_annee <- OISON_PMC %>%
 statuts_espece_par_annee$statut_LR <- factor(statuts_espece_par_annee$statut_LR, 
                                                levels = unique(statuts_espece_par_annee$statut_LR))
 ```
-
-
-
 ```{r , fig.width = 6 , fig.height = 3.5}
 # Transformation en tableau croisé dynamique
 statuts_espece_par_annee_tableau <- statuts_espece_par_annee %>%
@@ -928,6 +925,7 @@ flextable(statuts_espece_par_annee_tableau) %>%
   set_table_properties(width = 0.8, layout = "autofit") %>%
   autofit()
 ```
+
 
 Cette évolution est également représentée par le graphique ci-dessous, de `r params$annee_debut` à `r params$annee_fin`.
 
@@ -961,8 +959,6 @@ statuts_espece <- OISON_PMC %>%
 statuts_espece$statut_LR <- statuts_espece$statut_LR %>% 
   factor(levels = rev(statuts_espece$statut_LR))
 ```
-
-Présentation du nombre de saisies par statut en fonction des différents départements pour l'année `r params$annee_fin`.
 
 ```{r , fig.width = 6.5 , fig.height = 3.5}
 statuts_espece_dep <- OISON_PMC %>% 
@@ -1000,7 +996,6 @@ espece_pro_par_annee$espece_pro <- factor(espece_pro_par_annee$espece_pro,
 ```
 
 
-
 ```{r , fig.width = 6 , fig.height = 3.5}
 # Transformation en tableau croisé dynamique
 espece_pro_par_annee_tableau <- espece_pro_par_annee %>%
@@ -1030,7 +1025,6 @@ flextable(espece_pro_par_annee_tableau) %>%
   set_table_properties(width = 0.8, layout = "autofit") %>%
   autofit()
 ```
-
 
 
 ```{r}
@@ -1082,7 +1076,7 @@ for(dep in deps){
 
 ```
 
-L'évolution des saisies d'espèces protégées, au niveau régional, en fonction des différents groupes d'espèces, de `r params$annee_debut` à `r params$annee_fin`.
+L'évolution des saisies d'espèces protégées, au niveau régional, en fonction des différents groupes d'espèces, de `r params$annee_fin`.
 
 ```{r , fig.width = 6 , fig.height = 3.5}
 # Identifier automatiquement les colonnes numériques (ou à aligner)
@@ -1210,6 +1204,8 @@ ggplot(observations_statut) +
   theme(text = element_text(size = 9),
       plot.title = element_text(size = 9) )
 ```
+
+
 Cette carte de chaleur représente les saisies par des ronds, la couleur est fonction du statut de l'espèce. Ici, les trois statuts sont représentés. L'intensité de la couleur gradue le nombre de saisies sur le secteur concerné. \newpage
 
 ```{r}
@@ -1228,6 +1224,8 @@ ggplot(observations_statut_normale) +
   theme(text = element_text(size = 9),
       plot.title = element_text(size = 9) )
 ```
+
+
 Cette carte de chaleur représente les saisies des espèces dites "normales". L'intensité de la couleur gradue le nombre de saisies sur le secteur concerné.
 
 ```{r}
@@ -1246,6 +1244,8 @@ ggplot(observations_statut_menacee) +
   theme(text = element_text(size = 9),
       plot.title = element_text(size = 9) )
 ```
+
+
 Cette carte de chaleur représente les saisies des espèces dites "menacées". L'intensité de la couleur gradue le nombre de saisies sur le secteur concerné.
 
 ```{r}
@@ -1264,6 +1264,8 @@ ggplot(observations_statut_envahissante) +
   theme(text = element_text(size = 9),
       plot.title = element_text(size = 9) )
 ```
+
+
 Cette carte de chaleur représente les saisies des espèces dites "envahissante". L'intensité de la couleur gradue le nombre de saisies sur le secteur concerné.
 
 ## Représentation des saisies sur les espèces protégées
@@ -1283,6 +1285,8 @@ ggplot(observations_espece_pro) +
   theme(text = element_text(size = 9),
       plot.title = element_text(size = 9) )
 ```
+
+
 Cette carte de chaleur représente les saisies par des ronds, la couleur est fonction du statut de la réglementation de l'espèce. L'intensité de la couleur gradue le nombre de saisies sur le secteur concerné. \newpage
 
 ```{r}
@@ -1301,6 +1305,8 @@ ggplot(observations_espece_pro_seulement) +
   theme(text = element_text(size = 9),
       plot.title = element_text(size = 9) )
 ```
+
+
 Cette carte de chaleur représente les saisies des espèces protégées. L'intensité de la couleur gradue le nombre de saisies sur le secteur concerné.
 
 ```{r}
@@ -1319,7 +1325,11 @@ ggplot(observations_espece_non_pro) +
   theme(text = element_text(size = 9),
       plot.title = element_text(size = 9))
 ```
-Cette carte de chaleur représente les saisies des espèces non protégées. L'intensité de la couleur gradue le nombre de saisies sur le secteur concerné.\newpage
+
+
+Cette carte de chaleur représente les saisies des espèces non protégées. L'intensité de la couleur gradue le nombre de saisies sur le secteur concerné.
+
+\newpage
 
 # Annexes
 
