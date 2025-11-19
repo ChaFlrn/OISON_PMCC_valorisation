@@ -1287,7 +1287,7 @@ ggplot(observations_espece_pro) +
 ```
 
 
-Cette carte de chaleur représente les saisies par des ronds, la couleur est fonction du statut de la réglementation de l'espèce. L'intensité de la couleur gradue le nombre de saisies sur le secteur concerné. \newpage
+Cette carte de chaleur représente les saisies par des ronds, la couleur est fonction de la réglementation de l'espèce. L'intensité de la couleur gradue le nombre de saisies sur le secteur concerné. \newpage
 
 ```{r}
 observations_espece_pro_seulement <- OISON_PMC %>% 
