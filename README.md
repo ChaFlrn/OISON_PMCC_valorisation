@@ -1,6 +1,6 @@
 # Valorisation des données OISON et PMCC de l'OFB
 ## Objectif
-Ce projet produit des rapports automatisés de l'évolution de la saisies sur les données de l'OFB issues de OISON et du réseau PMCC. 
+Ce projet produit des rapports automatisés de l'évolution des saisies sur les données de l'OFB issues de OISON et du réseau PMCC. 
 
 ## Arborescence du projet
 ### Fichier "Make.R"
@@ -12,7 +12,7 @@ Elements concernants les espèces et les limites administratives.
 Les assets sont utilisées à la fois directement dans le Rmarkdown mais aussi pour générer des fichiers intermédiaires dans processed_data.
 
 ### Output
-Sorties des rapports automatisés départemnataux et régionaux.
+Sorties des rapports automatisés départementaux et régionaux.
 
 ### Processed_data
 Fichiers intémédiaires créés à partir des scripts et des fichiers dans assets et raw_data.
