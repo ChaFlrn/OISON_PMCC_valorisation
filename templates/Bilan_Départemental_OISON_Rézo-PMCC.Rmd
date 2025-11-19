@@ -37,18 +37,25 @@ library(flextable) # permet de faire des beaux tableaux
 library(scales) # format des nombres
 
 colors_esp <- c(
-  "Arachnides" = "#E41A1C",      # Rouge vif
-  "Autres" = "#377EB8",          # Bleu foncé
-  "Reptiles" = "#4DAF4A",        # Vert
-  "Poissons" = "#984EA3",        # Violet foncé
-  "Angiospermes" = "#FF7F00",    # Orange
-  "Amphibiens" = "#FFF333",      # Jaune vif
-  "Insectes" = "#A65628",        # Brun
-  "Mammifères" = "#F781BF",      # Rose
-  "PMC" = "#D8B365",             # Brun clair
-  "Crustacés" = "#66DAA0",       # Vert turquoise
-  "Oiseaux" = "#3288BD",         # Bleu clair
-  "Non spécifié"= "#BBBBBB"      # Gris
+  "Arachnides" = "#E41A1C",      
+  "Autres" = "#1B4D3E",          
+  "Reptiles" = "#4DAF4A",       
+  "Poissons" = "#984EA3",       
+  "Angiospermes" = "#FF7F00",   
+  "Amphibiens" = "#FFF333",     
+  "Insectes" = "#A65628",      
+  "Mammiferes" = "#F781BF",     
+  "PMC" = "#D8B365",             
+  "Crustaces" = "#66DAA0",       
+  "Oiseaux" = "#4895EF", 
+  "Bivalves" = "#A6CEE3",
+  "Rhodophytes" = "#FB9A99",
+  "Ptéridophytes" = "#B2DF8A",
+  "Gymnospermes" = "#CAB2D6",
+  "Hydrozoaires" = "#FDDC77",
+  "Gasteropodes" = "#8DD3C7",
+  "Bryophytes" = "#FFBC79",
+  "Non spécifié"= "#BBBBBB"      
 )
 
 colors_pmc <- c(
@@ -65,18 +72,18 @@ colors_pmc <- c(
 )
 
 colors_dep <- c(
-  "16" = "#FF6F61",   
-  "17" = "#3A6EA5",   
-  "19" = "#E3B23C",   
-  "23" = "#9DBE8C",  
-  "24" = "#FF9B85",   
-  "33" = "#B0C4DE",   
-  "40" = "#F3E000",   
-  "47" = "#2C3E50",  
-  "64" = "#C17ECF",   
-  "79" = "#B2957B",    
-  "86" = "#8F5B34",   
-  "87" = "#FFF3B4"   
+  "16" = "#1F65C1",   
+  "17" = "#A35CC8",   
+  "19" = "#8CCB3F",   
+  "23" = "#52B788",  
+  "24" = "#B03A2E",   
+  "33" = "#FCBF49",   
+  "40" = "#FF6D00",   
+  "47" = "#F2E45A",  
+  "64" = "#E41A1C",   
+  "79" = "#7209B7",    
+  "86" = "#4895EF",   
+  "87" = "#1B4D3E"   
 )
 
 colors_statut <- c(
@@ -383,7 +390,8 @@ saisies_observateur_violon <- OISON_PMC %>%
   
 ```
 
-   
+\newpage
+
 Le graphique suivant illustre la répartition du nombre de saisies par observateur. Pour un nombre de saisie donné, plus la zone colorée est large, plus il y a d'observateurs concernés. Le carré noir symbolise la médiane alors que le losange jaune identifie la moyenne.
 
 ```{r , fig.width = 6.5 , fig.height = 3.5}
@@ -410,7 +418,7 @@ ggplot(saisies_observateur_violon, aes(x = factor(INSEE_DEP), y = nombre_saisies
 # Evolution sur les espèces
 
 ## Evolution du nombre de saisies par groupe d'espèces
-L'évolution du nombre de saisies par groupe d'espèces est représentée par les deux graphiques ci-dessous :
+L'évolution du nombre de saisies par groupe d'espèces est représentée par les graphiques ci-dessous :
 
 
 - évolution du nombre des saisies au fil des années
@@ -434,7 +442,7 @@ groupes_espece_par_annee$GROUP2_INPN <- factor(groupes_espece_par_annee$GROUP2_I
                                                levels = unique(groupes_espece_par_annee$GROUP2_INPN))
 ```
 
-```{r , fig.width = 6.5 , fig.height = 3.5}
+```{r , fig.width = 8.5 , fig.height = 5.5}
 ggplot(groupes_espece_par_annee) +
   aes(x = annee, y = nb_saisies, colour = GROUP2_INPN) +
   geom_smooth(se = FALSE) +
@@ -445,7 +453,8 @@ ggplot(groupes_espece_par_annee) +
        colour = "Groupes d'espèces",
        title = paste("Evolution du nombre de saisies par groupe d'espèces pour le SD", params$dep,nom_bases)) +
   theme_minimal() +
-  theme(text = element_text(size = 9))
+  theme(text = element_text(size = 9),
+        legend.position = "bottom")
 ```
 
 ```{r}
@@ -465,7 +474,7 @@ groupes_espece$GROUP2_INPN <- groupes_espece$GROUP2_INPN %>%
   factor(levels = rev(groupes_espece$GROUP2_INPN))
 ```
 
-```{r , fig.width = 6.5 , fig.height = 3.5}
+```{r , fig.width = 8.5 , fig.height = 6.5}
 ggplot(groupes_espece)+
   aes(x = factor(1), y = pourcentage, fill = GROUP2_INPN) +
   geom_bar(width = 1, stat = "identity", color = "white") +
@@ -483,10 +492,11 @@ ggplot(groupes_espece)+
     title = paste("Répartition des saisies par groupe d'espèces pour le SD", params$dep,"en",params$annee_fin,nom_bases)
     ) +
   theme(
-    text = element_text(size = 9),
+    text = element_text(size = 8),
     plot.title = element_text(hjust = 0.2),  # Aligne le titre à gauche
     legend.margin = margin(t = 0, r = 0, b = 0, l = 50),  # Espace à gauche de la légende
-    plot.margin = margin(t = 1, r = 1, b = 1, l = 1)
+    plot.margin = margin(t = 1, r = 1, b = 1, l = 1),
+    legend.position = "bottom"
   )
 ```
 \newpage
@@ -545,7 +555,6 @@ flextable(groupes_espece_tableau) %>%
   bold(part = "header") %>% 
   align(j = 2:5, align = "right") %>%   # Aligner à droite les colonnes de saisies
   align(part = "header",j = 2:5, align = "right") %>% 
-  set_caption( caption = paste("Nombre de saisies par groupe d'espèces \nen", params$annee_fin, nom_bases)) %>% 
   bg(i=nrow(groupes_espece_tableau), bg = "#DDDDDD") %>%
   
 autofit()
@@ -599,7 +608,8 @@ if (params$OISON) {
          colour = "Groupes d'espèces",
          title = paste("Nombre de saisies par groupe d'espèces sans les oiseaux pour le SD", params$dep, nom_bases)) +
     theme_minimal() +
-    theme(text = element_text(size = 9))
+    theme(text = element_text(size = 8),
+          legend.position = "bottom")
 }
 ```
 ```{r}
@@ -690,7 +700,7 @@ if (params$OISON) {
 }
 ```
 
-```{r , fig.width = 6.5 , fig.height = 3.5}
+```{r , fig.width = 6.5 , fig.height = 6.5}
 if (params$OISON) {
   ggplot(groupes_espece_sans_oiseaux) +
     aes(x = factor(1), y = pourcentage, fill = GROUP2_INPN) +
@@ -709,10 +719,11 @@ if (params$OISON) {
       title = paste("Saisies par groupe d'espèces sans les oiseaux pour le SD", params$dep,"en", params$annee_fin, nom_bases)
     ) +
   theme(
-    text = element_text(size = 9),
+    text = element_text(size = 8),
     plot.title = element_text(hjust = 0.2),  # Aligne le titre à gauche
     legend.margin = margin(t = 0, r = 0, b = 0, l = 30),  # Espace à gauche de la légende
-    plot.margin = margin(t = 1, r = 2, b = 1, l = 1)
+    plot.margin = margin(t = 1, r = 2, b = 1, l = 1),
+    legend.position = "bottom"
   )
 }
 ```
@@ -777,7 +788,7 @@ ggplot(statuts_espece_par_annee) +
   geom_smooth(se = FALSE) +
   geom_point()+
   geom_text(aes(label = nb_saisies, x = annee),
-            nudge_y = 30,
+            position = position_nudge(y = max(statuts_espece_par_annee$nb_saisies)/15),
             size = 3,
             show.legend = FALSE) +
   scale_colour_manual(values = colors_statut) +
@@ -840,7 +851,7 @@ flextable(espece_pro_par_annee_tableau) %>%
 
 ```
 
-L'évolution du nombre de saisies d'espèces protégées `r nom_bases`, en fonction des différents groupes, est décrite dans la tableau ci-dessous. Ce tableau décrit également la contribution départementale pour la région pour chaque groupe d'espèces pour l'année `r params$annee_fin`.
+L'évolution du nombre de saisies d'espèces protégées `r nom_bases`, en fonction des différents groupes, est décrite dans le tableau ci-dessous. Ce tableau décrit également la contribution départementale pour la région pour chaque groupe d'espèces pour l'année `r params$annee_fin`.
 
 ```{r , fig.width = 6 , fig.height = 3.5}
 #Pour la Région
@@ -901,6 +912,8 @@ flextable(groupes_espece_pro_tableau) %>%
 autofit()
 ```
 
+\newpage
+
 Cette évolution du nombre de saisies des espèces protégées est représentée par les deux graphiques ci-dessous :
 
 
@@ -915,7 +928,7 @@ ggplot(espece_pro_par_annee) +
   geom_smooth(se = FALSE) +
   geom_point()+
   geom_text(aes(label = nb_saisies, x = annee),
-            nudge_y = 25,
+            position = position_nudge(y = max(espece_pro_par_annee$nb_saisies)/15),
             size = 3,
             show.legend = FALSE) +
   scale_colour_manual(values = colors_pro) +
@@ -946,7 +959,7 @@ groupes_espece_pro$GROUP2_INPN <- groupes_espece_pro$GROUP2_INPN %>%
   factor(levels = rev(groupes_espece_pro$GROUP2_INPN))
 ```
 
-```{r , fig.width = 6.5 , fig.height = 3.5}
+```{r , fig.width = 6.5 , fig.height = 6.5}
 ggplot(groupes_espece_pro)+
   aes(x = factor(1), y = pourcentage, fill = GROUP2_INPN) +
   geom_bar(width = 1, stat = "identity", color = "white") +
@@ -954,7 +967,7 @@ ggplot(groupes_espece_pro)+
   theme_void()+
   scale_fill_manual(values = colors_esp) +
   
-  geom_text(data=tail(groupes_espece_pro,2), #CHANGER LE CHIFFRE POUR AFFICHER PLUS/MOINS DE NOMS
+  geom_text(data=tail(groupes_espece_pro,3), #CHANGER LE CHIFFRE POUR AFFICHER PLUS/MOINS DE NOMS
             aes(x = 1.8, 
                 y = cumulative, 
                 label=paste(GROUP2_INPN,"\n",pourcentage, "%")),
@@ -964,10 +977,11 @@ ggplot(groupes_espece_pro)+
     title = paste("Saisies par groupe d'espèces protégées pour le SD", params$dep,"en",params$annee_fin,nom_bases)
     ) +
   theme(
-    text = element_text(size = 9),
+    text = element_text(size = 8),
     plot.title = element_text(hjust = 0.2),  # Aligne le titre à gauche
     legend.margin = margin(t = 0, r = 0, b = 0, l = 50),  # Espace à gauche de la légende
-    plot.margin = margin(t = 1, r = 1, b = 1, l = 1)
+    plot.margin = margin(t = 1, r = 1, b = 1, l = 1),
+    legend.position = "bottom"
   )
 ```
 
@@ -1021,7 +1035,7 @@ ggplot(observations_statut) +
       plot.title = element_text(size = 9))
 ```
 
-Cette carte de chaleur représente les saisies par des ronds, la couleur est fonction du statut de l'espèce. Ici, les trois statuts sont représentés. L'intensité de la couleur gradue le nombre de saisies sur le secteur concerné.
+Cette carte de chaleur représente les saisies par des ronds, la couleur est fonction du statut de l'espèce. Ici, les trois statuts sont représentés. L'intensité de la couleur gradue le nombre de saisies sur le secteur concerné.\newpage
 
 ```{r}
 observations_statut_normale <- OISON_PMC %>% 
@@ -1041,7 +1055,7 @@ ggplot(observations_statut_normale) +
       plot.title = element_text(size = 9))
 ```
 
-Cette carte de chaleur représente les saisies des espèces dites "normales". L'intensité de la couleur gradue le nombre de saisies sur le secteur concerné.
+Cette carte de chaleur représente les saisies des espèces dites "normales". L'intensité de la couleur gradue le nombre de saisies sur le secteur concerné.\newpage
 
 ```{r}
 observations_statut_menacee <- OISON_PMC %>%
@@ -1055,13 +1069,13 @@ ggplot(observations_statut_menacee) +
   geom_sf(aes(geometry = geom, color = statut_LR), lwd = 0.5, alpha = 0.6, size = 1, shape = 19) +
   geom_sf(data = departements, fill = NA, color = "black", lwd = 0.5) +
   scale_color_manual(values = colors_statut, name = "Statut espèces") +
-  labs(title = paste("Représentation des saisies des espèces menacées \de",params$annee_debut,"à",params$annee_fin,nom_bases)) +
+  labs(title = paste("Représentation des saisies des espèces menacées \nde",params$annee_debut,"à",params$annee_fin,nom_bases)) +
   theme_void() +
   theme(text = element_text(size = 9),
       plot.title = element_text(size = 9))
 ```
 
-Cette carte de chaleur représente les saisies des espèces dites "menacées". L'intensité de la couleur gradue le nombre de saisies sur le secteur concerné.
+Cette carte de chaleur représente les saisies des espèces dites "menacées". L'intensité de la couleur gradue le nombre de saisies sur le secteur concerné.\newpage
 
 ```{r}
 observations_statut_envahissante <- OISON_PMC %>%
@@ -1122,7 +1136,7 @@ ggplot(observations_espece_pro_seulement) +
       plot.title = element_text(size = 9))
 ```
 
-Cette carte de chaleur représente les saisies des espèces protégées. L'intensité de la couleur gradue le nombre de saisies sur le secteur concerné.
+Cette carte de chaleur représente les saisies des espèces protégées. L'intensité de la couleur gradue le nombre de saisies sur le secteur concerné.\newpage
 
 
 ```{r}
@@ -1145,6 +1159,8 @@ ggplot(observations_espece_pro_seulement) +
 
 
 Cette carte de chaleur représente les saisies des espèces non protégées. L'intensité de la couleur gradue le nombre de saisies sur le secteur concerné.
+
+
 \newpage
 
 # Annexes
